@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - BACKUP_DIR=/app/backups
+    volumes:
+      - backup-data:/app/backups
+      - pdf-files:/app/public/files
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER:-crm}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-crm}
+      - POSTGRES_DB=${DB_NAME:-crm}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-crm}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pg-data:
+  backup-data:
+  pdf-files:

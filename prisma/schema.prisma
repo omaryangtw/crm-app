@@ -1,0 +1,242 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Sex {
+  male
+  female
+}
+
+enum IncomeStatus {
+  low
+  mid_low         @map("mid-low")
+  mid_low_elderly @map("mid-low-elderly")
+}
+
+enum DisabledStatus {
+  light
+  mid
+  heavy
+}
+
+enum IndigenousGroup {
+  amis       @map("阿美")
+  atayal     @map("泰雅")
+  bunun      @map("布農")
+  kanakanavu @map("卡那卡那富")
+  kavalan    @map("噶瑪蘭")
+  paiwan     @map("排灣")
+  puyuma     @map("卑南")
+  rukai      @map("魯凱")
+  hla_alua   @map("拉阿魯哇")
+  saisiyat   @map("賽夏")
+  sakizaya   @map("撒奇萊雅")
+  seediq     @map("賽德克")
+  truku      @map("太魯閣")
+  thao       @map("邵")
+  tsou       @map("鄒")
+  yami       @map("雅美")
+}
+
+enum PlainMountain {
+  plain    @map("平原")
+  mountain @map("山原")
+}
+
+enum CaseStatus {
+  in_progress @map("處理中")
+  closed      @map("結案")
+}
+
+enum CaseTypeMajor {
+  general   @map("一般")
+  legal     @map("法律")
+  emergency @map("急難救助")
+}
+
+enum CaseTypeMinor {
+  general_minor     @map("一般")
+  job_seeking       @map("求職")
+  petition          @map("陳情")
+  policy_suggestion @map("施政建議")
+  debt              @map("債務")
+  labor_dispute     @map("勞資")
+  traffic_accident  @map("車禍")
+  family_affair     @map("家事")
+  inheritance       @map("繼承")
+  criminal          @map("刑事")
+  consultation      @map("諮詢")
+  non_litigation    @map("非訟")
+  living_assistance @map("生活扶助")
+  death_relief      @map("死亡救助")
+  emergency_relief  @map("急難紓困")
+  major_disaster    @map("重大災害")
+  medical_subsidy   @map("醫療補助")
+}
+
+enum ContactType {
+  outgoing @map("撥出")
+  incoming @map("來電")
+  visit    @map("親訪")
+  sms      @map("簡訊")
+}
+
+enum UserRole {
+  admin
+  user
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      UserRole @default(user)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Client {
+  id              Int              @id @default(autoincrement())
+  name            String?
+  nameAlt         String?          @map("name_alt")
+  idn             String?          @map("idn")
+  sex             Sex?
+  birthday        DateTime?        @db.Date
+  isDead          Boolean          @default(false) @map("is_dead")
+  householdAdmin  Boolean          @default(false) @map("household_admin")
+  incomeStatus    IncomeStatus?    @map("income_status")
+  disabledStatus  DisabledStatus?  @map("disabled_status")
+  indigenousGroup IndigenousGroup? @map("indigenous_group")
+  tribe           String?
+  plainMountain   PlainMountain?   @map("plain_mountain")
+
+  canCall       Boolean @default(true) @map("can_call")
+  phone         String?
+  phoneNote     String? @map("phone_note")
+  phoneAlt      String? @map("phone_alt")
+  phoneAltNote  String? @map("phone_alt_note")
+  mobile        String?
+  mobileNote    String? @map("mobile_note")
+  mobileAlt     String? @map("mobile_alt")
+  mobileAltNote String? @map("mobile_alt_note")
+
+  canMail     Boolean @default(true) @map("can_mail")
+  city        String?
+  cityAlt     String? @map("city_alt")
+  dist        String?
+  distAlt     String? @map("dist_alt")
+  vill        String?
+  villAlt     String? @map("vill_alt")
+  addr        String?
+  addrAlt     String? @map("addr_alt")
+  addrNote    String? @map("addr_note")
+  addrAltNote String? @map("addr_alt_note")
+  note        String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  cases    Case[]
+  contacts Contact[]
+  todos    Todo[]
+
+  // Family relations: this client as person A
+  familyRelationsAsA FamilyRelation[] @relation("PersonA")
+  // Family relations: this client as person B
+  familyRelationsAsB FamilyRelation[] @relation("PersonB")
+
+  @@map("clients")
+}
+
+model Staff {
+  id        Int      @id @default(autoincrement())
+  name      String
+  aliases   String[] @default([])
+  email     String?  @unique
+  phone     String?
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  cases    Case[]
+  contacts Contact[]
+
+  @@map("staff")
+}
+
+model Case {
+  id                   Int            @id @default(autoincrement())
+  name                 String?
+  status               CaseStatus?
+  personInChargeLegacy String?        @map("person_in_charge_legacy")
+  staffInCharge        Staff[]
+  typesMajor           CaseTypeMajor? @map("types_major")
+  typesMinor           CaseTypeMinor? @map("types_minor")
+  relation1            String?
+  relation2            String?
+  relation3            String?
+  contact1             String?
+  contact2             String?
+  contact3             String?
+  note                 String?
+  handle               String?
+
+  clientId  Int      @map("client_id")
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cases")
+}
+
+model Contact {
+  id                   Int          @id @default(autoincrement())
+  date                 DateTime?    @db.Date
+  contactType          ContactType? @map("contact_type")
+  isSuccess            Boolean      @default(true) @map("is_success")
+  record               String?
+  personInChargeLegacy String?      @map("person_in_charge_legacy")
+  staffInCharge        Staff[]
+
+  clientId  Int      @map("client_id")
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("contacts")
+}
+
+model Todo {
+  id   Int       @id @default(autoincrement())
+  date DateTime? @db.Date
+  done Boolean   @default(false)
+  note String?
+
+  clientId  Int      @map("client_id")
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("todos")
+}
+
+model FamilyRelation {
+  id           Int    @id @default(autoincrement())
+  personAId    Int    @map("person_a_id")
+  personBId    Int    @map("person_b_id")
+  relationAToB String @map("relation_a_to_b")
+  relationBToA String @map("relation_b_to_a")
+
+  personA Client @relation("PersonA", fields: [personAId], references: [id], onDelete: Cascade)
+  personB Client @relation("PersonB", fields: [personBId], references: [id], onDelete: Cascade)
+
+  @@unique([personAId, personBId])
+  @@map("family_relations")
+}
