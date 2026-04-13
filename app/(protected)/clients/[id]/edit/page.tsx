@@ -2,6 +2,9 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { prisma } from "@/app/_lib/db";
 import EditClientForm from "./edit-client-form";
+import { PageContainer } from "@/app/_components/page-container";
+import { PageHeader } from "@/app/_components/page-header";
+import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -22,9 +25,16 @@ export default async function EditClientPage({ params }: Props) {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="text-xl font-semibold mb-6">編輯族人 — {client.name}</h1>
+    <PageContainer size="narrow">
+      <BreadcrumbNav
+        items={[
+          { label: "族人", href: "/clients" },
+          { label: client.name ?? "(未命名)", href: `/clients/${id}` },
+          { label: "編輯" },
+        ]}
+      />
+      <PageHeader title={`編輯族人 — ${client.name}`} />
       <EditClientForm clientId={clientId} defaultValues={defaultValues} />
-    </div>
+    </PageContainer>
   );
 }

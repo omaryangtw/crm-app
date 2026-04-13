@@ -11,6 +11,7 @@
  */
 
 import { prisma } from "../db";
+import type { Prisma } from "@prisma/client";
 import type { CreateAuditLogParams } from "./audit-types";
 
 export function computeChangedFields(
@@ -47,8 +48,8 @@ export async function createAuditLogEntry(
         action: params.action,
         userId: params.userId,
         userEmail: params.userEmail,
-        oldData: params.oldData ?? undefined,
-        newData: params.newData ?? undefined,
+        oldData: (params.oldData ?? undefined) as Prisma.InputJsonValue | undefined,
+        newData: (params.newData ?? undefined) as Prisma.InputJsonValue | undefined,
         changedFields,
       },
     });

@@ -1,4 +1,5 @@
 import { prisma } from "@/app/_lib/db";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   searchParams: Promise<{ year?: string; month?: string }>;
@@ -64,21 +65,21 @@ export default async function PerformancePage({ searchParams }: Props) {
       <h1 className="text-xl font-semibold mb-4">績效統計</h1>
 
       <form className="flex items-center gap-3 mb-6">
-        <label className="text-sm text-gray-600">
+        <label className="text-sm text-muted-foreground">
           年份
           <input
             type="number"
             name="year"
             defaultValue={year}
-            className="ml-2 w-24 rounded-md border border-gray-300 px-2 py-1 text-sm"
+            className="ml-2 w-24 rounded-md border border-input px-2 py-1 text-sm"
           />
         </label>
-        <label className="text-sm text-gray-600">
+        <label className="text-sm text-muted-foreground">
           月份
           <select
             name="month"
             defaultValue={month}
-            className="ml-2 rounded-md border border-gray-300 px-2 py-1 text-sm"
+            className="ml-2 rounded-md border border-input px-2 py-1 text-sm"
           >
             {months.map((m) => (
               <option key={m} value={m}>
@@ -87,37 +88,34 @@ export default async function PerformancePage({ searchParams }: Props) {
             ))}
           </select>
         </label>
-        <button
-          type="submit"
-          className="rounded-md bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
-        >
+        <Button type="submit" size="sm">
           查詢
-        </button>
+        </Button>
       </form>
 
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {year} 年 {month} 月：共 {overallTotal} 筆通聯，成功 {overallSuccessful} 筆
       </p>
 
-      <div className="overflow-x-auto rounded-md border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto rounded-md border border-border">
+        <table className="min-w-full divide-y divide-border text-sm">
+          <thead className="bg-muted">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">承辦人</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">總通聯數</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">成功通聯數</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">承辦人</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">總通聯數</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">成功通聯數</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody className="divide-y divide-border bg-card">
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">
                   無資料
                 </td>
               </tr>
             ) : (
               rows.map((row) => (
-                <tr key={row.person} className="hover:bg-gray-50">
+                <tr key={row.person} className="hover:bg-muted/50">
                   <td className="px-4 py-3 whitespace-nowrap">{row.person}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{row.total}</td>
                   <td className="px-4 py-3 whitespace-nowrap">{row.successful}</td>

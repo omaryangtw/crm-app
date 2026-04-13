@@ -5,6 +5,7 @@ import Papa from "papaparse";
 import { exportClients } from "@/app/_lib/actions/export-actions";
 import { EXPORT_PRESETS } from "@/app/_lib/utils/export-utils";
 import type { ExportCriteria, ExportQuery } from "@/app/_lib/schemas/export-schema";
+import { Button } from "@/components/ui/button";
 
 const CLIENT_COLUMNS = [
   { key: "name", label: "姓名" },
@@ -136,42 +137,41 @@ export default function ExportPage() {
       <h1 className="text-xl font-semibold mb-4">資料匯出</h1>
 
       {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+        <div className="mb-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       {/* Preset buttons */}
       <div className="mb-6">
-        <h2 className="text-sm font-medium text-gray-700 mb-2">快速匯出</h2>
+        <h2 className="text-sm font-medium text-foreground mb-2">快速匯出</h2>
         <div className="flex flex-wrap gap-2">
-          <button
+          <Button
             onClick={() => handlePreset("householdMailing")}
             disabled={loading}
-            className="rounded-md bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-50"
+            variant="secondary"
           >
             平原家戶寄件
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => handlePreset("smsList")}
             disabled={loading}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
           >
             簡訊清單
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => handlePreset("googleContacts")}
             disabled={loading}
-            className="rounded-md bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700 disabled:opacity-50"
+            variant="outline"
           >
             匯入Google通訊錄
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Custom export filters */}
-      <div className="mb-6 rounded-md border border-gray-200 bg-white p-4">
-        <h2 className="text-sm font-medium text-gray-700 mb-3">篩選條件</h2>
+      <div className="mb-6 rounded-md border border-border bg-card p-4">
+        <h2 className="text-sm font-medium text-foreground mb-3">篩選條件</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {/* Boolean filters */}
           <label className="flex items-center gap-2 text-sm">
@@ -228,7 +228,7 @@ export default function ExportPage() {
           </label>
 
           {/* Sex */}
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             性別
             <select
               value={query.sex ?? ""}
@@ -238,7 +238,7 @@ export default function ExportPage() {
                   sex: (e.target.value || undefined) as ExportQuery["sex"],
                 }))
               }
-              className="ml-2 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 rounded-md border border-input px-2 py-1 text-sm"
             >
               <option value="">不限</option>
               <option value="male">男</option>
@@ -247,7 +247,7 @@ export default function ExportPage() {
           </label>
 
           {/* Disabled status */}
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             身障狀態
             <select
               value={query.disabledStatus ?? ""}
@@ -257,7 +257,7 @@ export default function ExportPage() {
                   disabledStatus: (e.target.value || undefined) as ExportQuery["disabledStatus"],
                 }))
               }
-              className="ml-2 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 rounded-md border border-input px-2 py-1 text-sm"
             >
               <option value="">不限</option>
               <option value="any">任一</option>
@@ -268,7 +268,7 @@ export default function ExportPage() {
           </label>
 
           {/* Income status */}
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             收入狀態
             <select
               value={query.incomeStatus ?? ""}
@@ -278,7 +278,7 @@ export default function ExportPage() {
                   incomeStatus: (e.target.value || undefined) as ExportQuery["incomeStatus"],
                 }))
               }
-              className="ml-2 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 rounded-md border border-input px-2 py-1 text-sm"
             >
               <option value="">不限</option>
               <option value="any">任一</option>
@@ -289,7 +289,7 @@ export default function ExportPage() {
           </label>
 
           {/* Indigenous group */}
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             族別
             <select
               value={query.group ?? ""}
@@ -299,7 +299,7 @@ export default function ExportPage() {
                   group: (e.target.value || undefined) as ExportQuery["group"],
                 }))
               }
-              className="ml-2 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 rounded-md border border-input px-2 py-1 text-sm"
             >
               {GROUP_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -310,7 +310,7 @@ export default function ExportPage() {
           </label>
 
           {/* Plain/Mountain */}
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             平原/山原
             <select
               value={query.plainMountain ?? ""}
@@ -320,7 +320,7 @@ export default function ExportPage() {
                   plainMountain: (e.target.value || undefined) as ExportQuery["plainMountain"],
                 }))
               }
-              className="ml-2 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 rounded-md border border-input px-2 py-1 text-sm"
             >
               <option value="">不限</option>
               <option value="any">任一</option>
@@ -330,7 +330,7 @@ export default function ExportPage() {
           </label>
 
           {/* Age range */}
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             年齡
             <input
               type="number"
@@ -342,7 +342,7 @@ export default function ExportPage() {
                   ageMin: e.target.value ? parseInt(e.target.value) : undefined,
                 }))
               }
-              className="ml-2 w-16 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 w-16 rounded-md border border-input px-2 py-1 text-sm"
             />
             <span className="mx-1">~</span>
             <input
@@ -355,12 +355,12 @@ export default function ExportPage() {
                   ageMax: e.target.value ? parseInt(e.target.value) : undefined,
                 }))
               }
-              className="w-16 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="w-16 rounded-md border border-input px-2 py-1 text-sm"
             />
           </label>
 
           {/* Partial match text fields */}
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             縣市
             <input
               type="text"
@@ -368,10 +368,10 @@ export default function ExportPage() {
               onChange={(e) =>
                 setQuery((q) => ({ ...q, city: e.target.value || undefined }))
               }
-              className="ml-2 w-28 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 w-28 rounded-md border border-input px-2 py-1 text-sm"
             />
           </label>
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             區
             <input
               type="text"
@@ -379,10 +379,10 @@ export default function ExportPage() {
               onChange={(e) =>
                 setQuery((q) => ({ ...q, dist: e.target.value || undefined }))
               }
-              className="ml-2 w-28 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 w-28 rounded-md border border-input px-2 py-1 text-sm"
             />
           </label>
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             姓名
             <input
               type="text"
@@ -390,10 +390,10 @@ export default function ExportPage() {
               onChange={(e) =>
                 setQuery((q) => ({ ...q, name: e.target.value || undefined }))
               }
-              className="ml-2 w-28 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 w-28 rounded-md border border-input px-2 py-1 text-sm"
             />
           </label>
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             里
             <input
               type="text"
@@ -401,10 +401,10 @@ export default function ExportPage() {
               onChange={(e) =>
                 setQuery((q) => ({ ...q, vill: e.target.value || undefined }))
               }
-              className="ml-2 w-28 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 w-28 rounded-md border border-input px-2 py-1 text-sm"
             />
           </label>
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             部落
             <input
               type="text"
@@ -412,10 +412,10 @@ export default function ExportPage() {
               onChange={(e) =>
                 setQuery((q) => ({ ...q, tribe: e.target.value || undefined }))
               }
-              className="ml-2 w-28 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 w-28 rounded-md border border-input px-2 py-1 text-sm"
             />
           </label>
-          <label className="text-sm text-gray-600">
+          <label className="text-sm text-muted-foreground">
             備註
             <input
               type="text"
@@ -423,26 +423,26 @@ export default function ExportPage() {
               onChange={(e) =>
                 setQuery((q) => ({ ...q, note: e.target.value || undefined }))
               }
-              className="ml-2 w-28 rounded-md border border-gray-300 px-2 py-1 text-sm"
+              className="ml-2 w-28 rounded-md border border-input px-2 py-1 text-sm"
             />
           </label>
         </div>
       </div>
 
       {/* Column selection */}
-      <div className="mb-6 rounded-md border border-gray-200 bg-white p-4">
+      <div className="mb-6 rounded-md border border-border bg-card p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-gray-700">選擇欄位</h2>
+          <h2 className="text-sm font-medium text-foreground">選擇欄位</h2>
           <div className="flex gap-2">
             <button
               onClick={selectAllColumns}
-              className="text-xs text-blue-600 hover:underline"
+              className="text-xs text-primary hover:underline"
             >
               全選
             </button>
             <button
               onClick={clearAllColumns}
-              className="text-xs text-gray-500 hover:underline"
+              className="text-xs text-muted-foreground hover:underline"
             >
               清除
             </button>
@@ -463,13 +463,12 @@ export default function ExportPage() {
       </div>
 
       {/* Custom export button */}
-      <button
+      <Button
         onClick={handleCustomExport}
         disabled={loading}
-        className="rounded-md bg-indigo-600 px-6 py-2 text-sm text-white hover:bg-indigo-700 disabled:opacity-50"
       >
         {loading ? "匯出中..." : "自訂匯出"}
-      </button>
+      </Button>
     </div>
   );
 }

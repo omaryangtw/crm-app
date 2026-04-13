@@ -1,28 +1,36 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Home,
+  Users,
+  FileText,
+  Phone,
+  FolderOpen,
+  UserCog,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
-  { href: "/", label: "首頁" },
-  { href: "/clients", label: "族人" },
-  { href: "/clients/new", label: "新增族人" },
-  { href: "/cases", label: "案件" },
-  { href: "/cases/new", label: "新增案件" },
-  { href: "/contacts", label: "通聯紀錄" },
-  { href: "/contacts/recent", label: "久未聯繫" },
-  { href: "/files", label: "文件" },
-  { href: "/staff", label: "員工管理" },
+  { href: "/", label: "首頁", icon: Home },
+  { href: "/clients", label: "族人", icon: Users },
+  { href: "/cases", label: "案件", icon: FileText },
+  { href: "/contacts", label: "通聯紀錄", icon: Phone },
+  { href: "/files", label: "文件", icon: FolderOpen },
+  { href: "/staff", label: "員工管理", icon: UserCog },
 ] as const;
 
 export function NavBar() {
   const { status } = useSession();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-white shadow-sm border-b border-border">
+    <nav className="bg-card shadow-sm border-b border-border">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           {/* Brand */}
@@ -32,15 +40,28 @@ export function NavBar() {
 
           {/* Desktop nav links */}
           <div className="hidden lg:flex lg:items-center lg:gap-1">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname === link.href || pathname.startsWith(link.href + "/");
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5",
+                    isActive
+                      ? "bg-muted text-foreground font-semibold"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  <link.icon className="size-4" />
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Auth buttons (desktop) */}
@@ -96,16 +117,29 @@ export function NavBar() {
       {menuOpen && (
         <div className="lg:hidden border-t border-border">
           <div className="space-y-1 px-4 py-3">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="block rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                onClick={() => setMenuOpen(false)}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname === link.href || pathname.startsWith(link.href + "/");
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-muted text-foreground font-semibold"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <link.icon className="size-4" />
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
           <div className="border-t border-border px-4 py-3 flex gap-2">
             {status === "authenticated" ? (

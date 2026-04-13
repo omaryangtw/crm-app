@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/app/_lib/db";
+import { PageContainer } from "@/app/_components/page-container";
+import { PageHeader } from "@/app/_components/page-header";
 
 export default async function RecentContactsPage() {
   // Fetch living, plain-mountain, callable clients who have at least one successful contact
@@ -50,44 +52,44 @@ export default async function RecentContactsPage() {
     });
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="text-xl font-semibold mb-4">久未聯繫</h1>
-      <p className="text-sm text-gray-500 mb-4">
+    <PageContainer>
+      <PageHeader title="久未聯繫" />
+      <p className="text-sm text-muted-foreground mb-4">
         共 {rows.length} 位族人（平原、可聯繫、有成功通聯紀錄）
       </p>
 
-      <div className="overflow-x-auto rounded-md border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto rounded-md border border-border">
+        <table className="min-w-full divide-y divide-border text-sm">
+          <thead className="bg-muted">
             <tr>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                 姓名
               </th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                 生日
               </th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600">
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">
                 最近成功聯繫日期
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody className="divide-y divide-border bg-card">
             {rows.length === 0 ? (
               <tr>
                 <td
                   colSpan={3}
-                  className="px-4 py-8 text-center text-gray-400"
+                  className="px-4 py-8 text-center text-muted-foreground"
                 >
                   無資料
                 </td>
               </tr>
             ) : (
               rows.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50">
+                <tr key={row.id} className="hover:bg-muted/50">
                   <td className="px-4 py-3 whitespace-nowrap">
                     <Link
                       href={`/clients/${row.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-primary hover:underline"
                     >
                       {row.name ?? "—"}
                     </Link>
@@ -108,6 +110,6 @@ export default async function RecentContactsPage() {
           </tbody>
         </table>
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { getStaffById } from "@/app/_lib/actions/staff-actions";
 import EditStaffForm from "./edit-staff-form";
+import { PageContainer } from "@/app/_components/page-container";
+import { PageHeader } from "@/app/_components/page-header";
+import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -22,11 +25,16 @@ export default async function EditStaffPage({ params }: Props) {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="text-xl font-semibold mb-6">
-        編輯員工 — {staff.name}
-      </h1>
+    <PageContainer size="narrow">
+      <BreadcrumbNav
+        items={[
+          { label: "員工管理", href: "/staff" },
+          { label: staff.name, href: `/staff/${id}` },
+          { label: "編輯" },
+        ]}
+      />
+      <PageHeader title={`編輯員工 — ${staff.name}`} />
       <EditStaffForm staffId={staffId} defaultValues={defaultValues} />
-    </div>
+    </PageContainer>
   );
 }

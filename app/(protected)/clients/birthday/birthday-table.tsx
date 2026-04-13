@@ -28,14 +28,14 @@ export function BirthdayTable({ clients }: BirthdayTableProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
-        <label htmlFor="month-filter" className="text-sm font-medium text-gray-700">
+        <label htmlFor="month-filter" className="text-sm font-medium text-foreground">
           月份篩選
         </label>
         <select
           id="month-filter"
           value={month}
           onChange={(e) => setMonth(Number(e.target.value))}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="rounded-md border border-input px-3 py-2 text-sm shadow-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
         >
           {MONTH_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -43,20 +43,20 @@ export function BirthdayTable({ clients }: BirthdayTableProps) {
             </option>
           ))}
         </select>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-muted-foreground">
           共 {filtered.length} 筆
         </span>
       </div>
 
-      <div className="overflow-x-auto rounded-md border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto rounded-md border border-border">
+        <table className="min-w-full divide-y divide-border text-sm">
+          <thead className="bg-muted">
             <tr>
               {["姓名", "生日", "年齡", "電話", "手機", "區域", "里", "地址", "可寄件"].map(
                 (header) => (
                   <th
                     key={header}
-                    className="px-4 py-3 text-left font-medium text-gray-600"
+                    className="px-4 py-3 text-left font-medium text-muted-foreground"
                   >
                     {header}
                   </th>
@@ -64,20 +64,20 @@ export function BirthdayTable({ clients }: BirthdayTableProps) {
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody className="divide-y divide-border bg-card">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
                   無資料
                 </td>
               </tr>
             ) : (
               filtered.map((c) => (
-                <tr key={c.id} className="hover:bg-gray-50">
+                <tr key={c.id} className="hover:bg-muted/50">
                   <td className="px-4 py-3 whitespace-nowrap">
                     <Link
                       href={`/clients/${c.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-primary hover:underline"
                     >
                       {c.name ?? "—"}
                     </Link>

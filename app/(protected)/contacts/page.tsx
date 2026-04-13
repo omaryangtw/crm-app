@@ -1,19 +1,41 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { prisma } from "@/app/_lib/db";
+import { Button } from "@/components/ui/button";
+import { PageContainer } from "@/app/_components/page-container";
+import { PageHeader } from "@/app/_components/page-header";
 import { ContactTable } from "./contact-table";
 
+const DEFAULT_PAGE_SIZE = 25;
+
+const SEARCH_FIELDS = ["record"] as const;
+
 interface Props {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; pageSize?: string }>;
 }
 
 export default async function ContactsPage({ searchParams }: Props) {
-  const { q } = await searchParams;
+  const params = await searchParams;
+  const q = params.q;
+  const pageSize = Math.max(1, parseInt(params.pageSize ?? "", 10) || DEFAULT_PAGE_SIZE);
+
+  const where = q
+    ? {
+        OR: SEARCH_FIELDS.map((field) => ({
+          [field]: { contains: q, mode: "insensitive" as const },
+        })),
+      }
+    : undefined;
+
+  const total = await prisma.contact.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.max(1, Math.min(parseInt(params.page ?? "", 10) || 1, totalPages));
+  const skip = (page - 1) * pageSize;
 
   const contacts = await prisma.contact.findMany({
-    where: q
-      ? { record: { contains: q, mode: "insensitive" } }
-      : undefined,
-    take: q ? undefined : 50,
+    where,
+    skip,
+    take: pageSize,
     orderBy: { createdAt: "desc" },
     include: {
       client: { select: { id: true, name: true } },
@@ -22,17 +44,23 @@ export default async function ContactsPage({ searchParams }: Props) {
   });
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold">通聯紀錄</h1>
-        <Link
-          href="/contacts/new"
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-        >
-          新增通聯
-        </Link>
-      </div>
-      <ContactTable contacts={contacts} />
-    </div>
+    <PageContainer>
+      <PageHeader
+        title="通聯紀錄"
+        actions={
+          <Link href="/contacts/new">
+            <Button>
+              <Plus className="size-4" data-icon="inline-start" />
+              新增通聯
+            </Button>
+          </Link>
+        }
+      />
+      <ContactTable
+        contacts={contacts}
+        searchQuery={q}
+        pagination={{ page, pageSize, total }}
+      />
+    </PageContainer>
   );
 }

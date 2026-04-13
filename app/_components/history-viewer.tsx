@@ -1,5 +1,8 @@
 import { getAuditLogs } from "@/app/_lib/audit/audit-queries";
 import type { EntityType } from "@/app/_lib/audit/audit-types";
+import { Badge } from "@/components/ui/badge";
+
+type AuditEntry = Awaited<ReturnType<typeof getAuditLogs>>["entries"][number];
 
 interface HistoryViewerProps {
   entityType: EntityType;
@@ -12,10 +15,10 @@ const ACTION_LABELS: Record<string, string> = {
   DELETE: "刪除",
 };
 
-const ACTION_COLORS: Record<string, string> = {
-  CREATE: "bg-green-100 text-green-800",
-  UPDATE: "bg-blue-100 text-blue-800",
-  DELETE: "bg-red-100 text-red-800",
+const ACTION_BADGE_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {
+  CREATE: "default",
+  UPDATE: "secondary",
+  DELETE: "destructive",
 };
 
 function formatTimestamp(date: Date): string {
@@ -35,34 +38,32 @@ export default async function HistoryViewer({
   const { entries } = await getAuditLogs({ entityType, entityId });
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="px-4 py-3 border-b">
+    <div className="bg-card rounded-lg shadow">
+      <div className="px-4 py-3 border-b border-border">
         <h2 className="text-lg font-semibold">變更歷史</h2>
       </div>
 
       {entries.length === 0 ? (
-        <div className="p-8 text-center text-gray-500">目前沒有變更紀錄</div>
+        <div className="p-8 text-center text-muted-foreground">目前沒有變更紀錄</div>
       ) : (
-        <div className="divide-y">
-          {entries.map((entry) => {
+        <div className="divide-y divide-border">
+          {entries.map((entry: AuditEntry) => {
             const isUpdate = entry.action === "UPDATE";
             const oldData = entry.oldData as Record<string, unknown> | null;
             const newData = entry.newData as Record<string, unknown> | null;
 
             return (
               <details key={entry.id} className="group">
-                <summary className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-gray-50 list-none [&::-webkit-details-marker]:hidden">
-                  <span
-                    className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${ACTION_COLORS[entry.action] ?? "bg-gray-100 text-gray-800"}`}
-                  >
+                <summary className="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-muted/50 list-none [&::-webkit-details-marker]:hidden">
+                  <Badge variant={ACTION_BADGE_VARIANT[entry.action] ?? "outline"}>
                     {ACTION_LABELS[entry.action] ?? entry.action}
-                  </span>
-                  <span className="text-sm text-gray-700">{entry.userEmail}</span>
-                  <span className="text-sm text-gray-500">
+                  </Badge>
+                  <span className="text-sm text-foreground">{entry.userEmail}</span>
+                  <span className="text-sm text-muted-foreground">
                     {formatTimestamp(entry.createdAt)}
                   </span>
                   {isUpdate && entry.changedFields.length > 0 && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-muted-foreground">
                       {entry.changedFields.join(", ")}
                     </span>
                   )}
@@ -72,22 +73,22 @@ export default async function HistoryViewer({
                   <div className="px-4 pb-4">
                     <table className="w-full text-sm border-collapse">
                       <thead>
-                        <tr className="text-left text-gray-500 border-b">
+                        <tr className="text-left text-muted-foreground border-b border-border">
                           <th className="py-1 pr-4 font-medium">變更欄位</th>
                           <th className="py-1 pr-4 font-medium">舊值</th>
                           <th className="py-1 font-medium">新值</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {entry.changedFields.map((field) => (
-                          <tr key={field} className="border-b last:border-b-0">
-                            <td className="py-1.5 pr-4 font-medium text-gray-700">
+                        {entry.changedFields.map((field: string) => (
+                          <tr key={field} className="border-b border-border last:border-b-0">
+                            <td className="py-1.5 pr-4 font-medium text-foreground">
                               {field}
                             </td>
-                            <td className="py-1.5 pr-4 text-red-600 break-all">
+                            <td className="py-1.5 pr-4 text-destructive break-all">
                               {formatValue(oldData[field])}
                             </td>
-                            <td className="py-1.5 text-green-600 break-all">
+                            <td className="py-1.5 text-primary break-all">
                               {formatValue(newData[field])}
                             </td>
                           </tr>

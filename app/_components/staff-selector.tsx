@@ -1,7 +1,23 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getActiveStaff } from "@/app/_lib/actions/staff-actions";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { ChevronsUpDown, X } from "lucide-react";
 
 interface StaffSelectorProps {
   /** Form field name, e.g. "staffInChargeIds" */
@@ -10,31 +26,21 @@ interface StaffSelectorProps {
   defaultValue?: number[];
 }
 
-const btnClass =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm text-left outline-none focus:ring-2 focus:ring-ring";
-
-export default function StaffSelector({ name, defaultValue = [] }: StaffSelectorProps) {
-  const [staffList, setStaffList] = useState<{ id: number; name: string }[]>([]);
+export default function StaffSelector({
+  name,
+  defaultValue = [],
+}: StaffSelectorProps) {
+  const [staffList, setStaffList] = useState<
+    { id: number; name: string; aliases: string[] }[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<number[]>(defaultValue);
   const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getActiveStaff()
       .then(setStaffList)
       .finally(() => setLoading(false));
-  }, []);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   function toggleId(id: number) {
@@ -43,62 +49,83 @@ export default function StaffSelector({ name, defaultValue = [] }: StaffSelector
     );
   }
 
-  const selectedNames = staffList
-    .filter((s) => selectedIds.includes(s.id))
-    .map((s) => s.name);
+  function removeId(id: number) {
+    setSelectedIds((prev) => prev.filter((x) => x !== id));
+  }
 
-  const displayText =
-    selectedNames.length === 0
-      ? "請選擇承辦人"
-      : selectedNames.join(", ");
+  const selectedStaff = staffList.filter((s) => selectedIds.includes(s.id));
 
   return (
-    <div ref={wrapperRef} className="relative">
+    <div className="space-y-1">
       <label className="mb-1 block text-sm font-medium">承辦人</label>
-      {/* Hidden input carries the comma-separated IDs for FormData */}
       <input type="hidden" name={name} value={selectedIds.join(",")} />
-      <button
-        type="button"
-        className={btnClass}
-        onClick={() => setOpen((prev) => !prev)}
-        disabled={loading}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
-        <span className="block truncate">{loading ? "載入中..." : displayText}</span>
-      </button>
-      {open && (
-        <ul
-          role="listbox"
-          aria-multiselectable="true"
-          className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border bg-white shadow-lg text-sm"
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger
+          render={
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between font-normal h-auto min-h-9"
+              disabled={loading}
+            />
+          }
         >
-          {staffList.length === 0 && (
-            <li className="px-3 py-2 text-gray-400">無可用承辦人</li>
-          )}
-          {staffList.map((s) => {
-            const checked = selectedIds.includes(s.id);
-            return (
-              <li
+          <div className="flex flex-wrap gap-1 flex-1">
+            {loading && (
+              <span className="text-muted-foreground">載入中...</span>
+            )}
+            {!loading && selectedStaff.length === 0 && (
+              <span className="text-muted-foreground">選擇承辦人...</span>
+            )}
+            {selectedStaff.map((s) => (
+              <Badge
                 key={s.id}
-                role="option"
-                aria-selected={checked}
-                className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
-                onClick={() => toggleId(s.id)}
+                variant="secondary"
+                className="gap-1"
               >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  readOnly
-                  className="rounded border-gray-300"
-                  tabIndex={-1}
-                />
-                <span>{s.name}</span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                {s.name}
+                <button
+                  type="button"
+                  className="rounded-full outline-none hover:bg-muted"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeId(s.id);
+                  }}
+                  aria-label={`移除 ${s.name}`}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </PopoverTrigger>
+        <PopoverContent className="w-[var(--anchor-width)] p-0" align="start">
+          <Command>
+            <CommandInput placeholder="搜尋承辦人..." />
+            <CommandList>
+              <CommandEmpty>無可用承辦人</CommandEmpty>
+              <CommandGroup>
+                {staffList.map((s) => {
+                  const checked = selectedIds.includes(s.id);
+                  return (
+                    <CommandItem
+                      key={s.id}
+                      value={s.name}
+                      onSelect={() => toggleId(s.id)}
+                      data-checked={checked}
+                    >
+                      <span className="mr-2">{checked ? "☑" : "☐"}</span>
+                      {s.name}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

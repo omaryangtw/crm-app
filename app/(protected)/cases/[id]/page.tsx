@@ -6,6 +6,13 @@ import {
   CASE_TYPE_MAJOR_LABELS,
   CASE_TYPE_MINOR_LABELS,
 } from "@/app/_lib/constants/enums";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { PageContainer } from "@/app/_components/page-container";
+import { PageHeader } from "@/app/_components/page-header";
+import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
+import { InfoRow } from "@/app/_components/info-row";
 import { DeleteCaseButton } from "./delete-case-button";
 import HistoryViewer from "@/app/_components/history-viewer";
 
@@ -26,94 +33,119 @@ export default async function CaseDetailPage({ params }: Props) {
   if (!caseRecord) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">
-          案件詳情 — {caseRecord.name ?? "(未命名)"}
-        </h1>
-        <div className="flex gap-3">
-          <Link
-            href={`/cases/${caseRecord.id}/edit`}
-            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
-          >
-            編輯
-          </Link>
-          <DeleteCaseButton caseId={caseRecord.id} caseName={caseRecord.name} />
-        </div>
-      </div>
+    <PageContainer size="narrow">
+      <BreadcrumbNav
+        items={[
+          { label: "案件", href: "/cases" },
+          { label: caseRecord.name ?? "(未命名)" },
+        ]}
+      />
+
+      <PageHeader
+        title={`案件詳情 — ${caseRecord.name ?? "(未命名)"}`}
+        actions={
+          <>
+            <Link href={`/cases/${caseRecord.id}/edit`}>
+              <Button>編輯</Button>
+            </Link>
+            <DeleteCaseButton caseId={caseRecord.id} caseName={caseRecord.name} />
+          </>
+        }
+      />
 
       {/* Associated client */}
-      <div className="mb-6 rounded-lg border bg-card p-4 shadow-sm">
-        <h2 className="text-base font-semibold mb-2">關聯族人</h2>
-        <Link
-          href={`/clients/${caseRecord.client.id}`}
-          className="text-indigo-600 hover:underline"
-        >
-          {caseRecord.client.name ?? "(未命名)"} (ID: {caseRecord.client.id})
-        </Link>
-      </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>關聯族人</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Link
+            href={`/clients/${caseRecord.client.id}`}
+            className="text-primary hover:underline"
+          >
+            {caseRecord.client.name ?? "(未命名)"} (ID: {caseRecord.client.id})
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Case details */}
-      <div className="rounded-lg border bg-card p-4 shadow-sm space-y-3 text-sm">
-        <h2 className="text-lg font-semibold mb-2">案件資料</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-          <InfoRow label="案件名稱" value={caseRecord.name} />
-          <InfoRow label="狀態" value={caseRecord.status ? CASE_STATUS_LABELS[caseRecord.status] : null} />
-          <InfoRow label="承辦人" value={caseRecord.staffInCharge.map((s) => s.name).join(", ") || null} />
-          <InfoRow label="案件大類" value={caseRecord.typesMajor ? CASE_TYPE_MAJOR_LABELS[caseRecord.typesMajor] : null} />
-          <InfoRow label="案件小類" value={caseRecord.typesMinor ? CASE_TYPE_MINOR_LABELS[caseRecord.typesMinor] : null} />
-        </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>案件資料</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+            <InfoRow label="案件名稱" value={caseRecord.name} />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground font-medium">狀態</span>
+              {caseRecord.status ? (
+                <Badge variant={caseRecord.status === "in_progress" ? "default" : "secondary"}>
+                  {CASE_STATUS_LABELS[caseRecord.status]}
+                </Badge>
+              ) : (
+                <span className="text-foreground">—</span>
+              )}
+            </div>
+            <InfoRow label="承辦人" value={caseRecord.staffInCharge.map((s) => s.name).join(", ") || null} />
+            <InfoRow label="案件大類" value={caseRecord.typesMajor ? CASE_TYPE_MAJOR_LABELS[caseRecord.typesMajor] : null} />
+            <InfoRow label="案件小類" value={caseRecord.typesMinor ? CASE_TYPE_MINOR_LABELS[caseRecord.typesMinor] : null} />
+          </div>
+        </CardContent>
+      </Card>
 
-        <hr className="my-3" />
-        <h3 className="text-base font-semibold mb-2">關係人</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-2">
-          <InfoRow label="關係人 1" value={caseRecord.relation1} />
-          <InfoRow label="關係人 2" value={caseRecord.relation2} />
-          <InfoRow label="關係人 3" value={caseRecord.relation3} />
-        </div>
+      {/* Relations */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>關係人</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+            <InfoRow label="關係人 1" value={caseRecord.relation1} />
+            <InfoRow label="關係人 2" value={caseRecord.relation2} />
+            <InfoRow label="關係人 3" value={caseRecord.relation3} />
+          </div>
+        </CardContent>
+      </Card>
 
-        <hr className="my-3" />
-        <h3 className="text-base font-semibold mb-2">聯絡人</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-2">
-          <InfoRow label="聯絡人 1" value={caseRecord.contact1} />
-          <InfoRow label="聯絡人 2" value={caseRecord.contact2} />
-          <InfoRow label="聯絡人 3" value={caseRecord.contact3} />
-        </div>
+      {/* Contacts */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>聯絡人</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+            <InfoRow label="聯絡人 1" value={caseRecord.contact1} />
+            <InfoRow label="聯絡人 2" value={caseRecord.contact2} />
+            <InfoRow label="聯絡人 3" value={caseRecord.contact3} />
+          </div>
+        </CardContent>
+      </Card>
 
-        {caseRecord.note && (
-          <>
-            <hr className="my-3" />
-            <h3 className="text-base font-semibold mb-2">備註</h3>
-            <p className="text-gray-700 whitespace-pre-wrap">{caseRecord.note}</p>
-          </>
-        )}
+      {/* Notes (conditional) */}
+      {caseRecord.note && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>備註</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm whitespace-pre-wrap">{caseRecord.note}</p>
+          </CardContent>
+        </Card>
+      )}
 
-        {caseRecord.handle && (
-          <>
-            <hr className="my-3" />
-            <h3 className="text-base font-semibold mb-2">處理情形</h3>
-            <p className="text-gray-700 whitespace-pre-wrap">{caseRecord.handle}</p>
-          </>
-        )}
-      </div>
+      {/* Handle (conditional) */}
+      {caseRecord.handle && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>處理情形</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm whitespace-pre-wrap">{caseRecord.handle}</p>
+          </CardContent>
+        </Card>
+      )}
 
       <HistoryViewer entityType="Case" entityId={caseRecord.id} />
-    </div>
-  );
-}
-
-function InfoRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | null | undefined;
-}) {
-  return (
-    <div className="flex justify-between">
-      <span className="font-semibold text-gray-600">{label}</span>
-      <span className="text-gray-800">{value ?? "-"}</span>
-    </div>
+    </PageContainer>
   );
 }

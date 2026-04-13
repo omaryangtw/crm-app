@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/app/_lib/db";
 import EditCaseForm from "./edit-case-form";
+import { PageContainer } from "@/app/_components/page-container";
+import { PageHeader } from "@/app/_components/page-header";
+import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -23,11 +26,16 @@ export default async function EditCasePage({ params }: Props) {
   };
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="text-xl font-semibold mb-6">
-        編輯案件 — {caseRecord.name ?? "(未命名)"}
-      </h1>
+    <PageContainer size="narrow">
+      <BreadcrumbNav
+        items={[
+          { label: "案件", href: "/cases" },
+          { label: caseRecord.name ?? "(未命名)", href: `/cases/${id}` },
+          { label: "編輯" },
+        ]}
+      />
+      <PageHeader title={`編輯案件 — ${caseRecord.name ?? "(未命名)"}`} />
       <EditCaseForm caseId={caseId} defaultValues={defaultValues} />
-    </div>
+    </PageContainer>
   );
 }

@@ -1,17 +1,38 @@
 import { prisma } from "@/app/_lib/db";
-import { format } from "date-fns";
+import { format, startOfMonth } from "date-fns";
+import { Users, FileText, Phone, AlertTriangle } from "lucide-react";
 import { TodoDashboard } from "./_components/todo-dashboard";
+import { PageContainer } from "./_components/page-container";
+import { PageHeader } from "./_components/page-header";
+import StatCard from "./_components/stat-card";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const todos = await prisma.todo.findMany({
-    where: { done: false },
-    orderBy: { date: "asc" },
-    include: {
-      client: { select: { id: true, name: true } },
-    },
-  });
+  const startOfCurrentMonth = startOfMonth(new Date());
+
+  const [todos, clientCount, activeCaseCount, monthlyContactCount, staleCount] =
+    await Promise.all([
+      prisma.todo.findMany({
+        where: { done: false },
+        orderBy: { date: "asc" },
+        include: {
+          client: { select: { id: true, name: true } },
+        },
+      }),
+      prisma.client.count(),
+      prisma.case.count({ where: { status: "in_progress" } }),
+      prisma.contact.count({ where: { date: { gte: startOfCurrentMonth } } }),
+      prisma.client.count({
+        where: {
+          contacts: {
+            none: {
+              date: { gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) },
+            },
+          },
+        },
+      }),
+    ]);
 
   const serialized = todos.map((t) => ({
     id: t.id,
@@ -21,9 +42,37 @@ export default async function Home() {
   }));
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-4">首頁</h1>
+    <PageContainer>
+      <PageHeader title="首頁" />
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <StatCard
+          title="族人總數"
+          value={clientCount}
+          icon={<Users className="h-5 w-5" />}
+          href="/clients"
+        />
+        <StatCard
+          title="進行中案件"
+          value={activeCaseCount}
+          icon={<FileText className="h-5 w-5" />}
+          href="/cases"
+        />
+        <StatCard
+          title="本月通聯"
+          value={monthlyContactCount}
+          icon={<Phone className="h-5 w-5" />}
+          href="/contacts"
+        />
+        <StatCard
+          title="久未聯繫"
+          value={staleCount}
+          icon={<AlertTriangle className="h-5 w-5" />}
+          href="/contacts/recent"
+        />
+      </div>
+
       <TodoDashboard todos={serialized} />
-    </div>
+    </PageContainer>
   );
 }

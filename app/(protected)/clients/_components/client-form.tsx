@@ -5,13 +5,18 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
 import {
   clientCreateSchema,
 } from "@/app/_lib/schemas/client-schema";
 import type { z } from "zod";
 
-// Use the input type (before defaults are applied) for the form,
-// since react-hook-form deals with user input where defaults are optional.
 type ClientFormValues = z.input<typeof clientCreateSchema>;
 import {
   SEX_LABELS,
@@ -28,11 +33,10 @@ interface ClientFormProps {
   submitLabel: string;
 }
 
-const inputClass =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
+const selectClass =
+  "w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
 const labelClass = "mb-1 block text-sm font-medium";
 const errorClass = "mt-1 text-sm text-destructive";
-const sectionClass = "rounded-lg border bg-card p-4 shadow-sm space-y-4";
 
 function SelectField({
   id,
@@ -50,7 +54,7 @@ function SelectField({
   return (
     <div>
       <label htmlFor={id} className={labelClass}>{label}</label>
-      <select id={id} className={inputClass} {...registration}>
+      <select id={id} className={selectClass} {...registration}>
         <option value="">-- 請選擇 --</option>
         {Object.entries(options).map(([value, display]) => (
           <option key={value} value={value}>{display}</option>
@@ -136,148 +140,170 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
       )}
 
       {/* 基本資料 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">基本資料</legend>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label htmlFor="name" className={labelClass}>姓名 *</label>
-            <input id="name" type="text" className={inputClass} {...register("name")} />
-            {errors.name && <p className={errorClass}>{errors.name.message}</p>}
+      <Card>
+        <CardHeader>
+          <CardTitle>基本資料</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label htmlFor="name" className={labelClass}>姓名 *</label>
+              <Input id="name" type="text" {...register("name")} />
+              {errors.name && <p className={errorClass}>{errors.name.message}</p>}
+            </div>
+            <div>
+              <label htmlFor="nameAlt" className={labelClass}>別名</label>
+              <Input id="nameAlt" type="text" {...register("nameAlt")} />
+            </div>
+            <div>
+              <label htmlFor="idn" className={labelClass}>身分證字號</label>
+              <Input id="idn" type="text" {...register("idn")} />
+            </div>
+            <SelectField id="sex" label="性別" options={SEX_LABELS} registration={register("sex")} error={errors.sex?.message} />
+            <div>
+              <label htmlFor="birthday" className={labelClass}>生日</label>
+              <Input id="birthday" type="date" {...register("birthday")} />
+              {errors.birthday && <p className={errorClass}>{errors.birthday.message}</p>}
+            </div>
+            <SelectField id="incomeStatus" label="收入狀態" options={INCOME_STATUS_LABELS} registration={register("incomeStatus")} error={errors.incomeStatus?.message} />
+            <SelectField id="disabledStatus" label="身障狀態" options={DISABLED_STATUS_LABELS} registration={register("disabledStatus")} error={errors.disabledStatus?.message} />
+            <SelectField id="indigenousGroup" label="族別" options={INDIGENOUS_GROUP_LABELS} registration={register("indigenousGroup")} error={errors.indigenousGroup?.message} />
+            <div>
+              <label htmlFor="tribe" className={labelClass}>部落</label>
+              <Input id="tribe" type="text" {...register("tribe")} />
+            </div>
+            <SelectField id="plainMountain" label="平原/山原" options={PLAIN_MOUNTAIN_LABELS} registration={register("plainMountain")} error={errors.plainMountain?.message} />
+            <div className="flex flex-wrap gap-6 sm:col-span-2 lg:col-span-3 pt-2">
+              <CheckboxField id="isDead" label="已歿" registration={register("isDead")} />
+              <CheckboxField id="householdAdmin" label="戶長" registration={register("householdAdmin")} />
+            </div>
           </div>
-          <div>
-            <label htmlFor="nameAlt" className={labelClass}>別名</label>
-            <input id="nameAlt" type="text" className={inputClass} {...register("nameAlt")} />
-          </div>
-          <div>
-            <label htmlFor="idn" className={labelClass}>身分證字號</label>
-            <input id="idn" type="text" className={inputClass} {...register("idn")} />
-          </div>
-          <SelectField id="sex" label="性別" options={SEX_LABELS} registration={register("sex")} error={errors.sex?.message} />
-          <div>
-            <label htmlFor="birthday" className={labelClass}>生日</label>
-            <input id="birthday" type="date" className={inputClass} {...register("birthday")} />
-            {errors.birthday && <p className={errorClass}>{errors.birthday.message}</p>}
-          </div>
-          <SelectField id="incomeStatus" label="收入狀態" options={INCOME_STATUS_LABELS} registration={register("incomeStatus")} error={errors.incomeStatus?.message} />
-          <SelectField id="disabledStatus" label="身障狀態" options={DISABLED_STATUS_LABELS} registration={register("disabledStatus")} error={errors.disabledStatus?.message} />
-          <SelectField id="indigenousGroup" label="族別" options={INDIGENOUS_GROUP_LABELS} registration={register("indigenousGroup")} error={errors.indigenousGroup?.message} />
-          <div>
-            <label htmlFor="tribe" className={labelClass}>部落</label>
-            <input id="tribe" type="text" className={inputClass} {...register("tribe")} />
-          </div>
-          <SelectField id="plainMountain" label="平原/山原" options={PLAIN_MOUNTAIN_LABELS} registration={register("plainMountain")} error={errors.plainMountain?.message} />
-          <div className="flex flex-wrap gap-6 sm:col-span-2 lg:col-span-3 pt-2">
-            <CheckboxField id="isDead" label="已歿" registration={register("isDead")} />
-            <CheckboxField id="householdAdmin" label="戶長" registration={register("householdAdmin")} />
-          </div>
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       {/* 電話資料 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">電話資料</legend>
-        <div className="mb-2">
-          <CheckboxField id="canCall" label="可聯繫電話" registration={register("canCall")} />
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="phone" className={labelClass}>電話</label>
-            <input id="phone" type="text" className={inputClass} {...register("phone")} />
+      <Card>
+        <CardHeader>
+          <CardTitle>電話資料</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="mb-2">
+            <CheckboxField id="canCall" label="可聯繫電話" registration={register("canCall")} />
           </div>
-          <div>
-            <label htmlFor="phoneNote" className={labelClass}>電話備註</label>
-            <input id="phoneNote" type="text" className={inputClass} {...register("phoneNote")} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="phone" className={labelClass}>電話</label>
+              <Input id="phone" type="text" {...register("phone")} />
+            </div>
+            <div>
+              <label htmlFor="phoneNote" className={labelClass}>電話備註</label>
+              <Input id="phoneNote" type="text" {...register("phoneNote")} />
+            </div>
+            <div>
+              <label htmlFor="phoneAlt" className={labelClass}>電話（備用）</label>
+              <Input id="phoneAlt" type="text" {...register("phoneAlt")} />
+            </div>
+            <div>
+              <label htmlFor="phoneAltNote" className={labelClass}>電話（備用）備註</label>
+              <Input id="phoneAltNote" type="text" {...register("phoneAltNote")} />
+            </div>
+            <div>
+              <label htmlFor="mobile" className={labelClass}>手機</label>
+              <Input id="mobile" type="text" {...register("mobile")} />
+            </div>
+            <div>
+              <label htmlFor="mobileNote" className={labelClass}>手機備註</label>
+              <Input id="mobileNote" type="text" {...register("mobileNote")} />
+            </div>
+            <div>
+              <label htmlFor="mobileAlt" className={labelClass}>手機（備用）</label>
+              <Input id="mobileAlt" type="text" {...register("mobileAlt")} />
+            </div>
+            <div>
+              <label htmlFor="mobileAltNote" className={labelClass}>手機（備用）備註</label>
+              <Input id="mobileAltNote" type="text" {...register("mobileAltNote")} />
+            </div>
           </div>
-          <div>
-            <label htmlFor="phoneAlt" className={labelClass}>電話（備用）</label>
-            <input id="phoneAlt" type="text" className={inputClass} {...register("phoneAlt")} />
-          </div>
-          <div>
-            <label htmlFor="phoneAltNote" className={labelClass}>電話（備用）備註</label>
-            <input id="phoneAltNote" type="text" className={inputClass} {...register("phoneAltNote")} />
-          </div>
-          <div>
-            <label htmlFor="mobile" className={labelClass}>手機</label>
-            <input id="mobile" type="text" className={inputClass} {...register("mobile")} />
-          </div>
-          <div>
-            <label htmlFor="mobileNote" className={labelClass}>手機備註</label>
-            <input id="mobileNote" type="text" className={inputClass} {...register("mobileNote")} />
-          </div>
-          <div>
-            <label htmlFor="mobileAlt" className={labelClass}>手機（備用）</label>
-            <input id="mobileAlt" type="text" className={inputClass} {...register("mobileAlt")} />
-          </div>
-          <div>
-            <label htmlFor="mobileAltNote" className={labelClass}>手機（備用）備註</label>
-            <input id="mobileAltNote" type="text" className={inputClass} {...register("mobileAltNote")} />
-          </div>
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       {/* 地址資料 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">地址資料</legend>
-        <div className="mb-2">
-          <CheckboxField id="canMail" label="可寄送郵件" registration={register("canMail")} />
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label htmlFor="city" className={labelClass}>縣市</label>
-            <input id="city" type="text" className={inputClass} {...register("city")} />
+      <Card>
+        <CardHeader>
+          <CardTitle>地址資料</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="mb-2">
+            <CheckboxField id="canMail" label="可寄送郵件" registration={register("canMail")} />
           </div>
-          <div>
-            <label htmlFor="dist" className={labelClass}>區域</label>
-            <input id="dist" type="text" className={inputClass} {...register("dist")} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label htmlFor="city" className={labelClass}>縣市</label>
+              <Input id="city" type="text" {...register("city")} />
+            </div>
+            <div>
+              <label htmlFor="dist" className={labelClass}>區域</label>
+              <Input id="dist" type="text" {...register("dist")} />
+            </div>
+            <div>
+              <label htmlFor="vill" className={labelClass}>里</label>
+              <Input id="vill" type="text" {...register("vill")} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label htmlFor="addr" className={labelClass}>地址</label>
+              <Input id="addr" type="text" {...register("addr")} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label htmlFor="addrNote" className={labelClass}>地址備註</label>
+              <Input id="addrNote" type="text" {...register("addrNote")} />
+            </div>
           </div>
-          <div>
-            <label htmlFor="vill" className={labelClass}>里</label>
-            <input id="vill" type="text" className={inputClass} {...register("vill")} />
-          </div>
-          <div className="sm:col-span-2 lg:col-span-3">
-            <label htmlFor="addr" className={labelClass}>地址</label>
-            <input id="addr" type="text" className={inputClass} {...register("addr")} />
-          </div>
-          <div className="sm:col-span-2 lg:col-span-3">
-            <label htmlFor="addrNote" className={labelClass}>地址備註</label>
-            <input id="addrNote" type="text" className={inputClass} {...register("addrNote")} />
-          </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <hr className="my-4" />
-        <p className="text-sm text-muted-foreground mb-2">備用地址</p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label htmlFor="cityAlt" className={labelClass}>縣市（備用）</label>
-            <input id="cityAlt" type="text" className={inputClass} {...register("cityAlt")} />
+      {/* 備用地址 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>備用地址</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label htmlFor="cityAlt" className={labelClass}>縣市（備用）</label>
+              <Input id="cityAlt" type="text" {...register("cityAlt")} />
+            </div>
+            <div>
+              <label htmlFor="distAlt" className={labelClass}>區域（備用）</label>
+              <Input id="distAlt" type="text" {...register("distAlt")} />
+            </div>
+            <div>
+              <label htmlFor="villAlt" className={labelClass}>里（備用）</label>
+              <Input id="villAlt" type="text" {...register("villAlt")} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label htmlFor="addrAlt" className={labelClass}>地址（備用）</label>
+              <Input id="addrAlt" type="text" {...register("addrAlt")} />
+            </div>
+            <div className="sm:col-span-2 lg:col-span-3">
+              <label htmlFor="addrAltNote" className={labelClass}>地址（備用）備註</label>
+              <Input id="addrAltNote" type="text" {...register("addrAltNote")} />
+            </div>
           </div>
-          <div>
-            <label htmlFor="distAlt" className={labelClass}>區域（備用）</label>
-            <input id="distAlt" type="text" className={inputClass} {...register("distAlt")} />
-          </div>
-          <div>
-            <label htmlFor="villAlt" className={labelClass}>里（備用）</label>
-            <input id="villAlt" type="text" className={inputClass} {...register("villAlt")} />
-          </div>
-          <div className="sm:col-span-2 lg:col-span-3">
-            <label htmlFor="addrAlt" className={labelClass}>地址（備用）</label>
-            <input id="addrAlt" type="text" className={inputClass} {...register("addrAlt")} />
-          </div>
-          <div className="sm:col-span-2 lg:col-span-3">
-            <label htmlFor="addrAltNote" className={labelClass}>地址（備用）備註</label>
-            <input id="addrAltNote" type="text" className={inputClass} {...register("addrAltNote")} />
-          </div>
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       {/* 備註 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">備註</legend>
-        <div>
-          <label htmlFor="note" className={labelClass}>備註</label>
-          <textarea id="note" rows={4} className={inputClass} {...register("note")} />
-        </div>
-      </fieldset>
+      <Card>
+        <CardHeader>
+          <CardTitle>備註</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <label htmlFor="note" className={labelClass}>備註</label>
+            <textarea id="note" rows={4} className={selectClass} {...register("note")} />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex gap-3">
         <Button type="submit" disabled={isSubmitting}>

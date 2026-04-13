@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
 import { caseCreateSchema } from "@/app/_lib/schemas/case-schema";
 import type { z } from "zod";
 import {
@@ -13,6 +20,7 @@ import {
   CASE_TYPE_MINOR_LABELS,
 } from "@/app/_lib/constants/enums";
 import StaffSelector from "@/app/_components/staff-selector";
+import ClientSelector from "@/app/_components/client-selector";
 
 type CaseFormValues = z.input<typeof caseCreateSchema>;
 
@@ -25,11 +33,10 @@ interface CaseFormProps {
   clientId?: number;
 }
 
-const inputClass =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
+const selectClass =
+  "w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
 const labelClass = "mb-1 block text-sm font-medium";
 const errorClass = "mt-1 text-sm text-destructive";
-const sectionClass = "rounded-lg border bg-card p-4 shadow-sm space-y-4";
 
 function SelectField({
   id,
@@ -47,7 +54,7 @@ function SelectField({
   return (
     <div>
       <label htmlFor={id} className={labelClass}>{label}</label>
-      <select id={id} className={inputClass} {...registration}>
+      <select id={id} className={selectClass} {...registration}>
         <option value="">-- 請選擇 --</option>
         {Object.entries(options).map(([value, display]) => (
           <option key={value} value={value}>{display}</option>
@@ -81,8 +88,17 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
     const formData = new FormData();
 
     for (const [key, value] of Object.entries(data)) {
+      if (key === "clientId") continue; // handled by ClientSelector hidden input
       if (value === null || value === undefined || value === "") continue;
       formData.append(key, String(value));
+    }
+
+    // Capture clientId from the hidden input in ClientSelector
+    if (formRef.current) {
+      const clientInput = formRef.current.querySelector<HTMLInputElement>('input[name="clientId"]');
+      if (clientInput && clientInput.value) {
+        formData.set("clientId", clientInput.value);
+      }
     }
 
     // Capture staffInChargeIds from the hidden input in StaffSelector
@@ -111,104 +127,120 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
       )}
 
       {/* 關聯族人 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">關聯族人</legend>
-        <div>
-          <label htmlFor="clientId" className={labelClass}>族人 ID *</label>
-          <input
-            id="clientId"
-            type="number"
-            className={inputClass}
-            {...register("clientId", { valueAsNumber: true })}
+      <Card>
+        <CardHeader>
+          <CardTitle>關聯族人</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ClientSelector
+            name="clientId"
+            defaultValue={clientId ?? defaultValues?.clientId}
+            label="族人 *"
+            error={errors.clientId?.message}
           />
-          {errors.clientId && <p className={errorClass}>{errors.clientId.message}</p>}
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       {/* 案件基本資料 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">案件資料</legend>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label htmlFor="name" className={labelClass}>案件名稱</label>
-            <input id="name" type="text" className={inputClass} {...register("name")} />
-            {errors.name && <p className={errorClass}>{errors.name.message}</p>}
+      <Card>
+        <CardHeader>
+          <CardTitle>案件資料</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label htmlFor="name" className={labelClass}>案件名稱</label>
+              <Input id="name" type="text" {...register("name")} />
+              {errors.name && <p className={errorClass}>{errors.name.message}</p>}
+            </div>
+            <SelectField
+              id="status"
+              label="狀態"
+              options={CASE_STATUS_LABELS}
+              registration={register("status")}
+              error={errors.status?.message}
+            />
+            <StaffSelector name="staffInChargeIds" defaultValue={defaultValues?.staffInChargeIds ?? []} />
+            <SelectField
+              id="typesMajor"
+              label="案件大類"
+              options={CASE_TYPE_MAJOR_LABELS}
+              registration={register("typesMajor")}
+              error={errors.typesMajor?.message}
+            />
+            <SelectField
+              id="typesMinor"
+              label="案件小類"
+              options={CASE_TYPE_MINOR_LABELS}
+              registration={register("typesMinor")}
+              error={errors.typesMinor?.message}
+            />
           </div>
-          <SelectField
-            id="status"
-            label="狀態"
-            options={CASE_STATUS_LABELS}
-            registration={register("status")}
-            error={errors.status?.message}
-          />
-          <StaffSelector name="staffInChargeIds" defaultValue={defaultValues?.staffInChargeIds ?? []} />
-          <SelectField
-            id="typesMajor"
-            label="案件大類"
-            options={CASE_TYPE_MAJOR_LABELS}
-            registration={register("typesMajor")}
-            error={errors.typesMajor?.message}
-          />
-          <SelectField
-            id="typesMinor"
-            label="案件小類"
-            options={CASE_TYPE_MINOR_LABELS}
-            registration={register("typesMinor")}
-            error={errors.typesMinor?.message}
-          />
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       {/* 關係人 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">關係人</legend>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label htmlFor="relation1" className={labelClass}>關係人 1</label>
-            <input id="relation1" type="text" className={inputClass} {...register("relation1")} />
+      <Card>
+        <CardHeader>
+          <CardTitle>關係人</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label htmlFor="relation1" className={labelClass}>關係人 1</label>
+              <Input id="relation1" type="text" {...register("relation1")} />
+            </div>
+            <div>
+              <label htmlFor="relation2" className={labelClass}>關係人 2</label>
+              <Input id="relation2" type="text" {...register("relation2")} />
+            </div>
+            <div>
+              <label htmlFor="relation3" className={labelClass}>關係人 3</label>
+              <Input id="relation3" type="text" {...register("relation3")} />
+            </div>
           </div>
-          <div>
-            <label htmlFor="relation2" className={labelClass}>關係人 2</label>
-            <input id="relation2" type="text" className={inputClass} {...register("relation2")} />
-          </div>
-          <div>
-            <label htmlFor="relation3" className={labelClass}>關係人 3</label>
-            <input id="relation3" type="text" className={inputClass} {...register("relation3")} />
-          </div>
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       {/* 聯絡人 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">聯絡人</legend>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label htmlFor="contact1" className={labelClass}>聯絡人 1</label>
-            <input id="contact1" type="text" className={inputClass} {...register("contact1")} />
+      <Card>
+        <CardHeader>
+          <CardTitle>聯絡人</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label htmlFor="contact1" className={labelClass}>聯絡人 1</label>
+              <Input id="contact1" type="text" {...register("contact1")} />
+            </div>
+            <div>
+              <label htmlFor="contact2" className={labelClass}>聯絡人 2</label>
+              <Input id="contact2" type="text" {...register("contact2")} />
+            </div>
+            <div>
+              <label htmlFor="contact3" className={labelClass}>聯絡人 3</label>
+              <Input id="contact3" type="text" {...register("contact3")} />
+            </div>
           </div>
-          <div>
-            <label htmlFor="contact2" className={labelClass}>聯絡人 2</label>
-            <input id="contact2" type="text" className={inputClass} {...register("contact2")} />
-          </div>
-          <div>
-            <label htmlFor="contact3" className={labelClass}>聯絡人 3</label>
-            <input id="contact3" type="text" className={inputClass} {...register("contact3")} />
-          </div>
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       {/* 備註與處理 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">備註與處理</legend>
-        <div>
-          <label htmlFor="note" className={labelClass}>備註</label>
-          <textarea id="note" rows={4} className={inputClass} {...register("note")} />
-        </div>
-        <div>
-          <label htmlFor="handle" className={labelClass}>處理情形</label>
-          <textarea id="handle" rows={4} className={inputClass} {...register("handle")} />
-        </div>
-      </fieldset>
+      <Card>
+        <CardHeader>
+          <CardTitle>備註與處理</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label htmlFor="note" className={labelClass}>備註</label>
+            <textarea id="note" rows={4} className={selectClass} {...register("note")} />
+          </div>
+          <div>
+            <label htmlFor="handle" className={labelClass}>處理情形</label>
+            <textarea id="handle" rows={4} className={selectClass} {...register("handle")} />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex gap-3">
         <Button type="submit" disabled={isSubmitting}>

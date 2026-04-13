@@ -3,6 +3,12 @@ import Link from "next/link";
 import { prisma } from "@/app/_lib/db";
 import { CONTACT_TYPE_LABELS } from "@/app/_lib/constants/enums";
 import HistoryViewer from "@/app/_components/history-viewer";
+import { PageContainer } from "@/app/_components/page-container";
+import { PageHeader } from "@/app/_components/page-header";
+import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
+import { InfoRow } from "@/app/_components/info-row";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -24,85 +30,85 @@ export default async function ContactDetailPage({ params }: Props) {
   if (!contact) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">通聯詳情</h1>
-        <Link
-          href="/contacts"
-          className="rounded-md bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-200"
-        >
-          返回列表
-        </Link>
-      </div>
+    <PageContainer size="narrow">
+      <BreadcrumbNav
+        items={[
+          { label: "通聯紀錄", href: "/contacts" },
+          { label: "通聯詳情" },
+        ]}
+      />
+      <PageHeader
+        title="通聯詳情"
+        actions={
+          <Link href="/contacts">
+            <Button variant="outline">返回列表</Button>
+          </Link>
+        }
+      />
 
       {/* Associated client */}
-      <div className="mb-6 rounded-lg border bg-card p-4 shadow-sm">
-        <h2 className="text-base font-semibold mb-2">關聯族人</h2>
-        <Link
-          href={`/clients/${contact.client.id}`}
-          className="text-indigo-600 hover:underline"
-        >
-          {contact.client.name ?? "(未命名)"} (ID: {contact.client.id})
-        </Link>
-      </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">關聯族人</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Link
+            href={`/clients/${contact.client.id}`}
+            className="text-primary hover:underline"
+          >
+            {contact.client.name ?? "(未命名)"} (ID: {contact.client.id})
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Contact details */}
-      <div className="rounded-lg border bg-card p-4 shadow-sm space-y-3 text-sm">
-        <h2 className="text-lg font-semibold mb-2">通聯資料</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-          <InfoRow
-            label="日期"
-            value={
-              contact.date
-                ? new Date(contact.date).toLocaleDateString("zh-TW")
-                : null
-            }
-          />
-          <InfoRow
-            label="類型"
-            value={
-              contact.contactType
-                ? (CONTACT_TYPE_LABELS[contact.contactType] ?? contact.contactType)
-                : null
-            }
-          />
-          <InfoRow label="成功" value={contact.isSuccess ? "是" : "否"} />
-          <InfoRow
-            label="承辦人"
-            value={
-              contact.staffInCharge.map((s) => s.name).join(", ") || null
-            }
-          />
-        </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>通聯資料</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+            <InfoRow
+              label="日期"
+              value={
+                contact.date
+                  ? new Date(contact.date).toLocaleDateString("zh-TW")
+                  : null
+              }
+            />
+            <InfoRow
+              label="類型"
+              value={
+                contact.contactType
+                  ? (CONTACT_TYPE_LABELS[contact.contactType] ?? contact.contactType)
+                  : null
+              }
+            />
+            <InfoRow label="成功" value={contact.isSuccess ? "是" : "否"} />
+            <InfoRow
+              label="承辦人"
+              value={
+                contact.staffInCharge.map((s) => s.name).join(", ") || null
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-        {contact.record && (
-          <>
-            <hr className="my-3" />
-            <h3 className="text-base font-semibold mb-2">紀錄</h3>
-            <p className="text-gray-700 whitespace-pre-wrap">
+      {contact.record && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">紀錄</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground whitespace-pre-wrap">
               {contact.record}
             </p>
-          </>
-        )}
-      </div>
+          </CardContent>
+        </Card>
+      )}
 
       <HistoryViewer entityType="Contact" entityId={contact.id} />
-    </div>
-  );
-}
-
-function InfoRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | null | undefined;
-}) {
-  return (
-    <div className="flex justify-between">
-      <span className="font-semibold text-gray-600">{label}</span>
-      <span className="text-gray-800">{value ?? "-"}</span>
-    </div>
+    </PageContainer>
   );
 }

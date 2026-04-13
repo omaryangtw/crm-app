@@ -1,22 +1,70 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   type ColumnDef,
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { filterStaff, type StaffRecord } from "@/app/_lib/utils/staff-utils";
+import { MoreHorizontal, UserCog, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { DataTable } from "@/app/_components/data-table";
+import { SearchInput } from "@/app/_components/search-input";
 
-const columns: ColumnDef<StaffRecord>[] = [
+interface StaffRow {
+  id: number;
+  name: string;
+  aliases: string[];
+  email: string | null;
+  phone: string | null;
+  isActive: boolean;
+}
+
+function ActionsCell({ row }: { row: StaffRow }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger render={<Button variant="ghost" size="icon-sm" />}>
+        <MoreHorizontal className="size-4" />
+        <span className="sr-only">操作選單</span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>
+          <Link href={`/staff/${row.id}`} className="w-full">
+            查看
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link href={`/staff/${row.id}/edit`} className="w-full">
+            編輯
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+const columns: ColumnDef<StaffRow>[] = [
   {
     accessorKey: "name",
     header: "姓名",
-    cell: ({ getValue }) => getValue<string>(),
+    cell: ({ row }) => (
+      <Link
+        href={`/staff/${row.original.id}`}
+        className="text-primary hover:underline"
+      >
+        {row.original.name}
+      </Link>
+    ),
   },
   {
     accessorKey: "email",
@@ -35,33 +83,30 @@ const columns: ColumnDef<StaffRecord>[] = [
     cell: ({ getValue }) => {
       const active = getValue<boolean>();
       return (
-        <span
-          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            active
-              ? "bg-green-100 text-green-800"
-              : "bg-gray-100 text-gray-600"
-          }`}
-        >
+        <Badge variant={active ? "default" : "secondary"}>
           {active ? "啟用" : "停用"}
-        </span>
+        </Badge>
       );
     },
+  },
+  {
+    id: "actions",
+    header: "",
+    enableSorting: false,
+    cell: ({ row }) => <ActionsCell row={row.original} />,
   },
 ];
 
 interface StaffTableProps {
-  staff: StaffRecord[];
+  staff: StaffRow[];
+  searchQuery?: string;
 }
 
-export function StaffTable({ staff }: StaffTableProps) {
-  const router = useRouter();
+export function StaffTable({ staff, searchQuery }: StaffTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [search, setSearch] = useState("");
-
-  const filtered = filterStaff(staff, search);
 
   const table = useReactTable({
-    data: filtered,
+    data: staff,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -69,81 +114,27 @@ export function StaffTable({ staff }: StaffTableProps) {
     getSortedRowModel: getSortedRowModel(),
   });
 
+  const emptyState = searchQuery
+    ? {
+        icon: <Search />,
+        title: `找不到符合「${searchQuery}」的結果`,
+        description: "請嘗試其他關鍵字",
+      }
+    : {
+        icon: <UserCog />,
+        title: "尚無員工資料",
+        description: "點擊下方按鈕新增第一筆員工",
+        action: { label: "新增員工", href: "/staff/new" },
+      };
+
   return (
     <div className="space-y-4">
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="搜尋員工（姓名、電子郵件、電話）"
-        className="w-full max-w-md rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+      <SearchInput placeholder="搜尋員工（姓名、電子郵件、電話）" />
+      <DataTable
+        table={table}
+        columns={columns}
+        emptyState={emptyState}
       />
-
-      <div className="overflow-x-auto rounded-md border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="px-4 py-3 text-left font-medium text-gray-600 select-none"
-                    onClick={header.column.getToggleSortingHandler()}
-                    style={{
-                      cursor: header.column.getCanSort()
-                        ? "pointer"
-                        : "default",
-                    }}
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {{
-                        asc: " ↑",
-                        desc: " ↓",
-                      }[header.column.getIsSorted() as string] ?? ""}
-                    </span>
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
-            {table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="px-4 py-8 text-center text-gray-400"
-                >
-                  無資料
-                </td>
-              </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => router.push(`/staff/${row.original.id}`)}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className="px-4 py-3 whitespace-nowrap"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }

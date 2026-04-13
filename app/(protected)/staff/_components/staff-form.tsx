@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
 import { staffCreateSchema } from "@/app/_lib/schemas/staff-schema";
 import type { z } from "zod";
 
@@ -18,11 +25,8 @@ interface StaffFormProps {
   submitLabel: string;
 }
 
-const inputClass =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
 const labelClass = "mb-1 block text-sm font-medium";
 const errorClass = "mt-1 text-sm text-destructive";
-const sectionClass = "rounded-lg border bg-card p-4 shadow-sm space-y-4";
 
 export default function StaffForm({
   defaultValues,
@@ -78,65 +82,65 @@ export default function StaffForm({
         </div>
       )}
 
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">員工資料</legend>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label htmlFor="name" className={labelClass}>
-              姓名 *
-            </label>
-            <input
-              id="name"
-              type="text"
-              className={inputClass}
-              {...register("name")}
-            />
-            {errors.name && (
-              <p className={errorClass}>{errors.name.message}</p>
-            )}
+      <Card>
+        <CardHeader>
+          <CardTitle>員工資料</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label htmlFor="name" className={labelClass}>
+                姓名 *
+              </label>
+              <Input
+                id="name"
+                type="text"
+                {...register("name")}
+              />
+              {errors.name && (
+                <p className={errorClass}>{errors.name.message}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="email" className={labelClass}>
+                電子郵件
+              </label>
+              <Input
+                id="email"
+                type="text"
+                {...register("email")}
+              />
+              {errors.email && (
+                <p className={errorClass}>{errors.email.message}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="phone" className={labelClass}>
+                電話
+              </label>
+              <Input
+                id="phone"
+                type="text"
+                {...register("phone")}
+              />
+              {errors.phone && (
+                <p className={errorClass}>{errors.phone.message}</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="aliases" className={labelClass}>
+                別名
+              </label>
+              <Input
+                id="aliases"
+                type="text"
+                placeholder="以逗號分隔，例如：AliasA, StaffA"
+                {...register("aliases")}
+              />
+            </div>
           </div>
-          <div>
-            <label htmlFor="email" className={labelClass}>
-              電子郵件
-            </label>
-            <input
-              id="email"
-              type="text"
-              className={inputClass}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className={errorClass}>{errors.email.message}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="phone" className={labelClass}>
-              電話
-            </label>
-            <input
-              id="phone"
-              type="text"
-              className={inputClass}
-              {...register("phone")}
-            />
-            {errors.phone && (
-              <p className={errorClass}>{errors.phone.message}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="aliases" className={labelClass}>
-              別名
-            </label>
-            <input
-              id="aliases"
-              type="text"
-              className={inputClass}
-              placeholder="以逗號分隔，例如：AliasA, StaffA"
-              {...register("aliases")}
-            />
-          </div>
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       <div className="flex gap-3">
         <Button type="submit" disabled={isSubmitting}>

@@ -4,6 +4,17 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { createFamilyRelation, deleteFamilyRelation } from "@/app/_lib/actions/family-actions";
 import { VALID_RELATIONSHIPS } from "@/app/_lib/constants/relationship-map";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import ClientSelector from "@/app/_components/client-selector";
 
 interface FamilyMember {
   id: number;
@@ -17,18 +28,22 @@ interface FamilySectionProps {
   familyMembers: FamilyMember[];
 }
 
+const selectClass =
+  "w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
+
 export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
   const [showForm, setShowForm] = useState(false);
-  const [targetId, setTargetId] = useState("");
   const [relationship, setRelationship] = useState("");
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
   function handleAdd() {
     setError("");
-    const tid = Number(targetId);
+    // Read targetId from the ClientSelector hidden input
+    const hiddenInput = document.querySelector<HTMLInputElement>('input[name="targetId"]');
+    const tid = Number(hiddenInput?.value);
     if (!tid || !relationship) {
-      setError("請填寫目標族人 ID 與關係");
+      setError("請選擇目標族人與關係");
       return;
     }
 
@@ -37,7 +52,6 @@ export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
       if (!result.success) {
         setError(result.error);
       } else {
-        setTargetId("");
         setRelationship("");
         setShowForm(false);
       }
@@ -54,89 +68,78 @@ export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
   }
 
   return (
-    <section className="mb-8">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold">家庭關係 ({familyMembers.length})</h2>
-        <button
+    <Card className="mb-8">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>家庭關係 ({familyMembers.length})</CardTitle>
+        <Button
           type="button"
+          size="sm"
           onClick={() => setShowForm(!showForm)}
-          className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700"
         >
           {showForm ? "取消" : "新增關係"}
-        </button>
-      </div>
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {error && (
+          <p className="text-sm text-destructive mb-2">{error}</p>
+        )}
 
-      {error && (
-        <p className="text-red-600 text-sm mb-2">{error}</p>
-      )}
-
-      {showForm && (
-        <div className="bg-white rounded-lg shadow p-4 mb-4 space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div>
-              <label htmlFor="targetId" className="block text-sm font-medium text-gray-700">
-                目標族人 ID
-              </label>
-              <input
-                id="targetId"
-                type="number"
-                value={targetId}
-                onChange={(e) => setTargetId(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                placeholder="輸入族人 ID"
+        {showForm && (
+          <div className="rounded-lg border bg-muted/50 p-4 mb-4 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <ClientSelector
+                name="targetId"
+                label="目標族人"
               />
-            </div>
-            <div>
-              <label htmlFor="relationship" className="block text-sm font-medium text-gray-700">
-                關係類型
-              </label>
-              <select
-                id="relationship"
-                value={relationship}
-                onChange={(e) => setRelationship(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-              >
-                <option value="">請選擇關係</option>
-                {VALID_RELATIONSHIPS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-end">
-              <button
-                type="button"
-                onClick={handleAdd}
-                disabled={isPending}
-                className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
-              >
-                {isPending ? "處理中..." : "確認新增"}
-              </button>
+              <div>
+                <label htmlFor="relationship" className="block text-sm font-medium mb-1">
+                  關係類型
+                </label>
+                <select
+                  id="relationship"
+                  value={relationship}
+                  onChange={(e) => setRelationship(e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="">請選擇關係</option>
+                  {VALID_RELATIONSHIPS.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-end">
+                <Button
+                  type="button"
+                  onClick={handleAdd}
+                  disabled={isPending}
+                >
+                  {isPending ? "處理中..." : "確認新增"}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {familyMembers.length === 0 ? (
-        <p className="text-gray-500 text-sm">尚無家庭關係</p>
-      ) : (
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left font-semibold text-gray-600">姓名</th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-600">關係</th>
-                <th className="px-4 py-2 text-left font-semibold text-gray-600">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
+        {familyMembers.length === 0 ? (
+          <p className="text-sm text-muted-foreground">尚無家庭關係</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>姓名</TableHead>
+                <TableHead>關係</TableHead>
+                <TableHead>操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {familyMembers.map((fm) => (
-                <tr key={`${fm.id}-${fm.personId}`}>
-                  <td className="px-4 py-2">{fm.personName}</td>
-                  <td className="px-4 py-2">{fm.relationship}</td>
-                  <td className="px-4 py-2 flex gap-2">
+                <TableRow key={`${fm.id}-${fm.personId}`}>
+                  <TableCell>{fm.personName}</TableCell>
+                  <TableCell>{fm.relationship}</TableCell>
+                  <TableCell className="flex gap-2">
                     <Link
                       href={`/clients/${fm.personId}`}
-                      className="text-indigo-600 hover:underline"
+                      className="text-primary hover:underline"
                     >
                       查看
                     </Link>
@@ -144,17 +147,17 @@ export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
                       type="button"
                       onClick={() => handleDelete(fm.id)}
                       disabled={isPending}
-                      className="text-red-600 hover:underline disabled:opacity-50"
+                      className="text-destructive hover:underline disabled:opacity-50"
                     >
                       刪除
                     </button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { loginSchema, type LoginInput } from "@/app/_lib/schemas/auth-schema";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -48,11 +49,10 @@ export default function LoginPage() {
             <label htmlFor="email" className="mb-1 block text-sm font-medium">
               電子郵件
             </label>
-            <input
+            <Input
               id="email"
               type="email"
               autoComplete="email"
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
               {...register("email")}
             />
             {errors.email && (
@@ -64,11 +64,10 @@ export default function LoginPage() {
             <label htmlFor="password" className="mb-1 block text-sm font-medium">
               密碼
             </label>
-            <input
+            <Input
               id="password"
               type="password"
               autoComplete="current-password"
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
               {...register("password")}
             />
             {errors.password && (

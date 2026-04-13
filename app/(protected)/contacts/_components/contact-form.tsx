@@ -5,10 +5,18 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
 import { contactCreateSchema } from "@/app/_lib/schemas/contact-schema";
 import type { z } from "zod";
 import { CONTACT_TYPE_LABELS } from "@/app/_lib/constants/enums";
 import StaffSelector from "@/app/_components/staff-selector";
+import ClientSelector from "@/app/_components/client-selector";
 
 type ContactFormValues = z.input<typeof contactCreateSchema>;
 
@@ -23,11 +31,10 @@ interface ContactFormProps {
   clientId?: number;
 }
 
-const inputClass =
-  "w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
+const selectClass =
+  "w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring";
 const labelClass = "mb-1 block text-sm font-medium";
 const errorClass = "mt-1 text-sm text-destructive";
-const sectionClass = "rounded-lg border bg-card p-4 shadow-sm space-y-4";
 
 export default function ContactForm({
   defaultValues,
@@ -58,8 +65,17 @@ export default function ContactForm({
     const formData = new FormData();
 
     for (const [key, value] of Object.entries(data)) {
+      if (key === "clientId") continue; // handled by ClientSelector hidden input
       if (value === null || value === undefined || value === "") continue;
       formData.append(key, String(value));
+    }
+
+    // Capture clientId from the hidden input in ClientSelector
+    if (formRef.current) {
+      const clientInput = formRef.current.querySelector<HTMLInputElement>('input[name="clientId"]');
+      if (clientInput && clientInput.value) {
+        formData.set("clientId", clientInput.value);
+      }
     }
 
     // Capture staffInChargeIds from the hidden input in StaffSelector
@@ -80,6 +96,13 @@ export default function ContactForm({
     // Navigate back to the client detail page if clientId is available
     if (data.clientId) {
       router.push(`/clients/${data.clientId}`);
+    } else if (formRef.current) {
+      const clientInput = formRef.current.querySelector<HTMLInputElement>('input[name="clientId"]');
+      if (clientInput?.value) {
+        router.push(`/clients/${clientInput.value}`);
+      } else {
+        router.push("/contacts");
+      }
     } else {
       router.push("/contacts");
     }
@@ -95,84 +118,83 @@ export default function ContactForm({
       )}
 
       {/* 關聯族人 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">關聯族人</legend>
-        <div>
-          <label htmlFor="clientId" className={labelClass}>
-            族人 ID *
-          </label>
-          <input
-            id="clientId"
-            type="number"
-            className={inputClass}
-            {...register("clientId", { valueAsNumber: true })}
+      <Card>
+        <CardHeader>
+          <CardTitle>關聯族人</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ClientSelector
+            name="clientId"
+            defaultValue={clientId ?? defaultValues?.clientId}
+            label="族人 *"
+            error={errors.clientId?.message}
           />
-          {errors.clientId && (
-            <p className={errorClass}>{errors.clientId.message}</p>
-          )}
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       {/* 通聯資料 */}
-      <fieldset className={sectionClass}>
-        <legend className="px-2 text-base font-semibold">通聯資料</legend>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Card>
+        <CardHeader>
+          <CardTitle>通聯資料</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <label htmlFor="date" className={labelClass}>
+                日期
+              </label>
+              <Input
+                id="date"
+                type="date"
+                {...register("date")}
+              />
+            </div>
+            <div>
+              <label htmlFor="contactType" className={labelClass}>
+                類型
+              </label>
+              <select
+                id="contactType"
+                className={selectClass}
+                {...register("contactType")}
+              >
+                <option value="">-- 請選擇 --</option>
+                {Object.entries(CONTACT_TYPE_LABELS).map(([value, display]) => (
+                  <option key={value} value={value}>
+                    {display}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <StaffSelector
+              name="staffInChargeIds"
+              defaultValue={defaultValues?.staffInChargeIds ?? []}
+            />
+            <div className="flex items-center gap-2">
+              <input
+                id="isSuccess"
+                type="checkbox"
+                defaultChecked={defaultValues?.isSuccess ?? true}
+                {...register("isSuccess")}
+              />
+              <label htmlFor="isSuccess" className="text-sm font-medium">
+                成功
+              </label>
+            </div>
+          </div>
           <div>
-            <label htmlFor="date" className={labelClass}>
-              日期
+            <label htmlFor="record" className={labelClass}>
+              紀錄
             </label>
-            <input
-              id="date"
-              type="date"
-              className={inputClass}
-              {...register("date")}
+            <textarea
+              id="record"
+              rows={4}
+              className={selectClass}
+              {...register("record")}
             />
           </div>
-          <div>
-            <label htmlFor="contactType" className={labelClass}>
-              類型
-            </label>
-            <select
-              id="contactType"
-              className={inputClass}
-              {...register("contactType")}
-            >
-              <option value="">-- 請選擇 --</option>
-              {Object.entries(CONTACT_TYPE_LABELS).map(([value, display]) => (
-                <option key={value} value={value}>
-                  {display}
-                </option>
-              ))}
-            </select>
-          </div>
-          <StaffSelector
-            name="staffInChargeIds"
-            defaultValue={defaultValues?.staffInChargeIds ?? []}
-          />
-          <div className="flex items-center gap-2">
-            <input
-              id="isSuccess"
-              type="checkbox"
-              defaultChecked={defaultValues?.isSuccess ?? true}
-              {...register("isSuccess")}
-            />
-            <label htmlFor="isSuccess" className="text-sm font-medium">
-              成功
-            </label>
-          </div>
-        </div>
-        <div>
-          <label htmlFor="record" className={labelClass}>
-            紀錄
-          </label>
-          <textarea
-            id="record"
-            rows={4}
-            className={inputClass}
-            {...register("record")}
-          />
-        </div>
-      </fieldset>
+        </CardContent>
+      </Card>
 
       <div className="flex gap-3">
         <Button type="submit" disabled={isSubmitting}>
