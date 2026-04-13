@@ -73,11 +73,19 @@ export function ContactTable({ contacts }: ContactTableProps) {
     {
       accessorKey: "date",
       header: "日期",
-      cell: ({ getValue }) => {
+      cell: ({ row, getValue }) => {
         const v = getValue<Date | string | null>();
-        if (!v) return "—";
-        const d = typeof v === "string" ? new Date(v) : v;
-        return d.toLocaleDateString("zh-TW");
+        const label = v
+          ? (typeof v === "string" ? new Date(v) : v).toLocaleDateString("zh-TW")
+          : "—";
+        return (
+          <Link
+            href={`/contacts/${row.original.id}`}
+            className="text-blue-600 hover:underline"
+          >
+            {label}
+          </Link>
+        );
       },
     },
     {

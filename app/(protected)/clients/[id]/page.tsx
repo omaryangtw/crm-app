@@ -15,6 +15,7 @@ import {
 } from "@/app/_lib/constants/enums";
 import { DeleteClientButton } from "./delete-client-button";
 import { FamilySection } from "./_components/family-section";
+import HistoryViewer from "@/app/_components/history-viewer";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -269,6 +270,9 @@ export default async function ClientDetailPage({ params }: Props) {
 
       {/* Family relations section — interactive client component */}
       <FamilySection clientId={client.id} familyMembers={familyMembers} />
+
+      {/* Audit log history */}
+      <HistoryViewer entityType="Client" entityId={client.id} />
     </div>
   );
 }

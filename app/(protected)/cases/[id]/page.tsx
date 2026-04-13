@@ -7,6 +7,7 @@ import {
   CASE_TYPE_MINOR_LABELS,
 } from "@/app/_lib/constants/enums";
 import { DeleteCaseButton } from "./delete-case-button";
+import HistoryViewer from "@/app/_components/history-viewer";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -96,6 +97,8 @@ export default async function CaseDetailPage({ params }: Props) {
           </>
         )}
       </div>
+
+      <HistoryViewer entityType="Case" entityId={caseRecord.id} />
     </div>
   );
 }

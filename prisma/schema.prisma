@@ -240,3 +240,21 @@ model FamilyRelation {
   @@unique([personAId, personBId])
   @@map("family_relations")
 }
+
+model AuditLog {
+  id            Int      @id @default(autoincrement())
+  entityType    String   @map("entity_type")
+  entityId      Int      @map("entity_id")
+  action        String
+  userId        Int      @map("user_id")
+  userEmail     String   @map("user_email")
+  oldData       Json?    @map("old_data")
+  newData       Json?    @map("new_data")
+  changedFields String[] @map("changed_fields")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

@@ -7,6 +7,7 @@ import { auth } from "../auth";
 import { caseCreateSchema, caseUpdateSchema } from "../schemas/case-schema";
 import { sanitizeObject } from "../utils/sanitize";
 import type { ActionResult } from "./auth-actions";
+import { createAuditLogEntry, serializeEntity } from "../audit/audit-service";
 
 export async function createCase(
   formData: FormData
@@ -32,8 +33,9 @@ export async function createCase(
   const { clientId, staffInChargeIds, ...rest } = parsed.data;
   const sanitized = sanitizeObject(rest as Record<string, unknown>);
 
+  let caseRecord: Awaited<ReturnType<typeof prisma.case.create>> | null = null;
   try {
-    const caseRecord = await prisma.case.create({
+    caseRecord = await prisma.case.create({
       data: {
         ...sanitized,
         clientId,
@@ -43,7 +45,6 @@ export async function createCase(
       },
     });
     revalidatePath("/cases");
-    return { success: true, data: { id: caseRecord.id } };
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === "P2002") return { success: false, error: "此資料已存在" };
@@ -56,6 +57,25 @@ export async function createCase(
     }
     return { success: false, error: "系統錯誤，請稍後再試" };
   }
+
+  try {
+    const userId = parseInt(session.user?.id ?? "0", 10);
+    const userEmail = session.user?.email ?? "";
+    await createAuditLogEntry({
+      entityType: "Case",
+      entityId: caseRecord.id,
+      action: "CREATE",
+      userId,
+      userEmail,
+      oldData: null,
+      newData: serializeEntity(caseRecord as unknown as Record<string, unknown>),
+      changedFields: [],
+    });
+  } catch {
+    // Audit failure must not affect CRUD result
+  }
+
+  return { success: true, data: { id: caseRecord.id } };
 }
 
 export async function updateCase(
@@ -83,8 +103,12 @@ export async function updateCase(
   const { staffInChargeIds, ...rest } = parsed.data;
   const sanitized = sanitizeObject(rest as Record<string, unknown>);
 
+  // Fetch old record before mutation for audit snapshot
+  const oldRecord = await prisma.case.findUnique({ where: { id } });
+
+  let caseRecord: Awaited<ReturnType<typeof prisma.case.update>> | null = null;
   try {
-    const caseRecord = await prisma.case.update({
+    caseRecord = await prisma.case.update({
       where: { id },
       data: {
         ...sanitized,
@@ -98,7 +122,6 @@ export async function updateCase(
       },
     });
     revalidatePath("/cases");
-    return { success: true, data: { id: caseRecord.id } };
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === "P2002") return { success: false, error: "此資料已存在" };
@@ -109,6 +132,29 @@ export async function updateCase(
     }
     return { success: false, error: "系統錯誤，請稍後再試" };
   }
+
+  try {
+    const userId = parseInt(session.user?.id ?? "0", 10);
+    const userEmail = session.user?.email ?? "";
+    const oldData = oldRecord
+      ? serializeEntity(oldRecord as unknown as Record<string, unknown>)
+      : null;
+    const newData = serializeEntity(caseRecord as unknown as Record<string, unknown>);
+    await createAuditLogEntry({
+      entityType: "Case",
+      entityId: caseRecord.id,
+      action: "UPDATE",
+      userId,
+      userEmail,
+      oldData,
+      newData,
+      changedFields: [],
+    });
+  } catch {
+    // Audit failure must not affect CRUD result
+  }
+
+  return { success: true, data: { id: caseRecord.id } };
 }
 
 export async function deleteCase(
@@ -117,14 +163,37 @@ export async function deleteCase(
   const session = await auth();
   if (!session) return { success: false, error: "請先登入" };
 
+  // Fetch old record before deletion for audit snapshot
+  const oldRecord = await prisma.case.findUnique({ where: { id } });
+
   try {
     await prisma.case.delete({ where: { id } });
     revalidatePath("/cases");
-    return { success: true, data: null };
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === "P2025") return { success: false, error: "找不到資料" };
     }
     return { success: false, error: "系統錯誤，請稍後再試" };
   }
+
+  try {
+    const userId = parseInt(session.user?.id ?? "0", 10);
+    const userEmail = session.user?.email ?? "";
+    await createAuditLogEntry({
+      entityType: "Case",
+      entityId: id,
+      action: "DELETE",
+      userId,
+      userEmail,
+      oldData: oldRecord
+        ? serializeEntity(oldRecord as unknown as Record<string, unknown>)
+        : null,
+      newData: null,
+      changedFields: [],
+    });
+  } catch {
+    // Audit failure must not affect CRUD result
+  }
+
+  return { success: true, data: null };
 }

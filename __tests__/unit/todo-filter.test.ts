@@ -33,12 +33,13 @@ function sortTodosByDateAsc(todos: Todo[]): Todo[] {
  * - Sorted by date ASC
  */
 describe("Feature: crm-modernization, Property 13: Todo list filter and sort", () => {
+  const validDate = fc
+    .date({ min: new Date("2020-01-01"), max: new Date("2030-12-31") })
+    .filter((d) => !isNaN(d.getTime()));
+
   const todoArb = fc.record({
     id: fc.nat(),
-    date: fc.option(
-      fc.date({ min: new Date("2020-01-01"), max: new Date("2030-12-31") }),
-      { nil: null }
-    ),
+    date: fc.option(validDate, { nil: null }),
     done: fc.boolean(),
     note: fc.option(fc.string({ maxLength: 100 }), { nil: null }),
     clientId: fc.nat({ max: 1000 }),
