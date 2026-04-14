@@ -36,6 +36,7 @@ import { DeleteClientButton } from "./delete-client-button";
 import { FamilySection } from "./_components/family-section";
 import { ContactsSection } from "./_components/contacts-section";
 import HistoryViewer from "@/app/_components/history-viewer";
+import ClientDetailTabs from "./_components/client-detail-tabs";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -231,74 +232,84 @@ export default async function ClientDetailPage({ params }: Props) {
         </CardStack>
       </DetailLayout>
 
-      {/* Cases section */}
-      <SectionCard
-        className="mb-8"
-        title="案件紀錄"
-        count={client.cases.length}
-        action={
-          <Link href={`/cases/new?clientId=${client.id}`}>
-            <Button size="sm">新增案件</Button>
-          </Link>
-        }
-      >
-          {client.cases.length === 0 ? (
-            <p className="text-sm text-muted-foreground">尚無案件紀錄</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>案件名稱</TableHead>
-                  <TableHead>狀態</TableHead>
-                  <TableHead>類型</TableHead>
-                  <TableHead>承辦人</TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {client.cases.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell>{c.name ?? "-"}</TableCell>
-                    <TableCell>
-                      {c.status ? (
-                        <Badge variant={c.status === "in_progress" ? "default" : "secondary"}>
-                          {CASE_STATUS_LABELS[c.status]}
-                        </Badge>
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {c.typesMajor ? CASE_TYPE_MAJOR_LABELS[c.typesMajor] : "-"}
-                    </TableCell>
-                    <TableCell>{c.staffInCharge.map((s) => s.name).join(", ") || "-"}</TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/cases/${c.id}`}
-                        className="text-primary hover:underline"
-                      >
-                        查看
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-      </SectionCard>
-
-      {/* Contacts section — interactive client component with quick contact toggle */}
-      <ContactsSection
+      {/* Bottom sections wrapped in Tab navigation */}
+      <ClientDetailTabs
         clientId={client.id}
         sessionStaffId={sessionStaffId}
-        contacts={client.contacts}
+        counts={{
+          cases: client.cases.length,
+          contacts: client.contacts.length,
+          family: familyMembers.length,
+        }}
+        casesContent={
+          <SectionCard
+            title="案件紀錄"
+            count={client.cases.length}
+            action={
+              <Link href={`/cases/new?clientId=${client.id}`}>
+                <Button size="sm">新增案件</Button>
+              </Link>
+            }
+          >
+            {client.cases.length === 0 ? (
+              <p className="text-sm text-muted-foreground">尚無案件紀錄</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>案件名稱</TableHead>
+                    <TableHead>狀態</TableHead>
+                    <TableHead>類型</TableHead>
+                    <TableHead>承辦人</TableHead>
+                    <TableHead>操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {client.cases.map((c) => (
+                    <TableRow key={c.id}>
+                      <TableCell>{c.name ?? "-"}</TableCell>
+                      <TableCell>
+                        {c.status ? (
+                          <Badge variant={c.status === "in_progress" ? "default" : "secondary"}>
+                            {CASE_STATUS_LABELS[c.status]}
+                          </Badge>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {c.typesMajor ? CASE_TYPE_MAJOR_LABELS[c.typesMajor] : "-"}
+                      </TableCell>
+                      <TableCell>{c.staffInCharge.map((s) => s.name).join(", ") || "-"}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/cases/${c.id}`}
+                          className="text-primary hover:underline"
+                        >
+                          查看
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </SectionCard>
+        }
+        contactsContent={
+          <ContactsSection
+            clientId={client.id}
+            sessionStaffId={sessionStaffId}
+            contacts={client.contacts}
+          />
+        }
+        familyContent={
+          <FamilySection clientId={client.id} familyMembers={familyMembers} />
+        }
+        historyContent={
+          <HistoryViewer entityType="Client" entityId={client.id} />
+        }
       />
-
-      {/* Family relations section — interactive client component */}
-      <FamilySection clientId={client.id} familyMembers={familyMembers} />
-
-      {/* Audit log history */}
-      <HistoryViewer entityType="Client" entityId={client.id} />
     </PageContainer>
   );
 }

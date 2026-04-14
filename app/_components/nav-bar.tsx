@@ -14,6 +14,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GlobalSearchTrigger, GlobalSearchMobileTrigger } from "./global-search-trigger";
 
 const NAV_LINKS = [
   { href: "/", label: "首頁", icon: Home },
@@ -63,6 +64,9 @@ export function NavBar() {
               );
             })}
           </div>
+
+          {/* Global search trigger (desktop) */}
+          <GlobalSearchTrigger />
 
           {/* Auth buttons (desktop) */}
           <div className="hidden lg:flex lg:items-center lg:gap-2">
@@ -140,6 +144,8 @@ export function NavBar() {
                 </Link>
               );
             })}
+            {/* Mobile search trigger */}
+            <GlobalSearchMobileTrigger onAfterClick={() => setMenuOpen(false)} />
           </div>
           <div className="border-t border-border px-4 py-3 flex gap-2">
             {status === "authenticated" ? (

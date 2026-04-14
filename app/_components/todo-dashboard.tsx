@@ -47,7 +47,7 @@ export function TodoDashboard({ todos }: TodoDashboardProps) {
       <div className="flex-1">
         <div className="bg-card rounded-lg shadow">
           <div className="px-4 py-3 border-b border-border">
-            <h2 className="text-lg font-semibold">待辦事項</h2>
+            <h2 className="font-heading text-base leading-snug font-medium">待辦事項</h2>
           </div>
           {todos.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">

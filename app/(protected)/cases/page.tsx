@@ -21,9 +21,13 @@ export default async function CasesPage({ searchParams }: Props) {
 
   const where = q
     ? {
-        OR: SEARCH_FIELDS.map((field) => ({
-          [field]: { contains: q, mode: "insensitive" as const },
-        })),
+        OR: [
+          ...SEARCH_FIELDS.map((field) => ({
+            [field]: { contains: q, mode: "insensitive" as const },
+          })),
+          { client: { name: { contains: q, mode: "insensitive" as const } } },
+          { staffInCharge: { some: { name: { contains: q, mode: "insensitive" as const } } } },
+        ],
       }
     : undefined;
 

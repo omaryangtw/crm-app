@@ -30,12 +30,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
+        token.sub = user.id as string;
         token.role = (user as { role: string }).role;
         token.staffId = (user as { staffId?: number | null }).staffId ?? null;
       }
       return token;
     },
     session({ session, token }) {
+      if (token.sub) session.user.id = token.sub;
       session.user.role = token.role as string;
       session.user.staffId = (token.staffId as number | null) ?? null;
       return session;
