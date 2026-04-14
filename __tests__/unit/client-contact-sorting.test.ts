@@ -14,7 +14,7 @@ function sortContacts<T extends { date: Date | null; createdAt: Date }>(contacts
     const dateA = safeTime(a.date);
     const dateB = safeTime(b.date);
     if (dateA !== dateB) return dateA - dateB;
-    return a.createdAt.getTime() - b.createdAt.getTime();
+    return safeTime(a.createdAt) - safeTime(b.createdAt);
   });
 }
 
@@ -43,7 +43,7 @@ describe("Feature: crm-modernization, Property 3: Client detail contact sorting"
             const prevDate = safeTime(prev.date);
             const currDate = safeTime(curr.date);
             if (prevDate === currDate) {
-              expect(prev.createdAt.getTime()).toBeLessThanOrEqual(curr.createdAt.getTime());
+              expect(safeTime(prev.createdAt)).toBeLessThanOrEqual(safeTime(curr.createdAt));
             } else {
               expect(prevDate).toBeLessThan(currDate);
             }

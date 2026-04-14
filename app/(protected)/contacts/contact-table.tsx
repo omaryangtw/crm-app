@@ -36,6 +36,7 @@ interface ContactRow {
   record: string | null;
   staffInCharge: { id: number; name: string }[];
   client: { id: number; name: string | null };
+  case?: { id: number; name: string | null } | null;
 }
 
 function ActionsCell({ row }: { row: ContactRow }) {
@@ -172,6 +173,24 @@ const columns: ColumnDef<ContactRow>[] = [
     header: "承辦人",
     accessorFn: (row) => row.staffInCharge.map((s) => s.name).join(", ") || null,
     cell: ({ getValue }) => getValue<string | null>() ?? "—",
+  },
+  {
+    id: "caseName",
+    header: "關聯案件",
+    accessorFn: (row) => row.case?.name ?? null,
+    cell: ({ row }) => {
+      const caseData = row.original.case;
+      return caseData ? (
+        <Link
+          href={`/cases/${caseData.id}`}
+          className="text-primary hover:underline"
+        >
+          {caseData.name ?? "—"}
+        </Link>
+      ) : (
+        "—"
+      );
+    },
   },
   {
     id: "clientName",

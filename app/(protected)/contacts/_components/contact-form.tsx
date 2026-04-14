@@ -17,6 +17,7 @@ import type { z } from "zod";
 import { CONTACT_TYPE_LABELS } from "@/app/_lib/constants/enums";
 import StaffSelector from "@/app/_components/staff-selector";
 import ClientSelector from "@/app/_components/client-selector";
+import CaseSelector from "@/app/_components/case-selector";
 import { FormGrid } from "@/app/_components/form-grid";
 
 type ContactFormValues = z.input<typeof contactCreateSchema>;
@@ -30,6 +31,8 @@ interface ContactFormProps {
   submitLabel: string;
   /** Pre-filled clientId (for create from client detail) */
   clientId?: number;
+  /** Pre-filled caseId (from URL parameter, e.g. case detail "新增通聯" button) */
+  caseId?: number;
   /** 當前登入使用者綁定的 staffId，用於新增時自動預填 */
   sessionStaffId?: number | null;
 }
@@ -44,10 +47,14 @@ export default function ContactForm({
   onSubmitAction,
   submitLabel,
   clientId,
+  caseId,
   sessionStaffId,
 }: ContactFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<number | undefined>(
+    clientId ?? defaultValues?.clientId
+  );
   const formRef = useRef<HTMLFormElement>(null);
 
   const {
@@ -70,6 +77,7 @@ export default function ContactForm({
 
     for (const [key, value] of Object.entries(data)) {
       if (key === "clientId") continue; // handled by ClientSelector hidden input
+      if (key === "caseId") continue; // handled by CaseSelector hidden input
       if (value === null || value === undefined || value === "") continue;
       formData.append(key, String(value));
     }
@@ -89,6 +97,14 @@ export default function ContactForm({
       );
       if (hiddenInput) {
         formData.set("staffInChargeIds", hiddenInput.value);
+      }
+    }
+
+    // Capture caseId from the hidden input in CaseSelector
+    if (formRef.current) {
+      const caseInput = formRef.current.querySelector<HTMLInputElement>('input[name="caseId"]');
+      if (caseInput && caseInput.value) {
+        formData.set("caseId", caseInput.value);
       }
     }
 
@@ -132,6 +148,7 @@ export default function ContactForm({
             defaultValue={clientId ?? defaultValues?.clientId}
             label="族人 *"
             error={errors.clientId?.message}
+            onClientChange={(id) => setSelectedClientId(id ?? undefined)}
           />
         </CardContent>
       </Card>
@@ -185,6 +202,14 @@ export default function ContactForm({
                 成功
               </label>
             </div>
+            <CaseSelector
+              key={selectedClientId ?? "no-client"}
+              name="caseId"
+              clientId={selectedClientId}
+              defaultValue={caseId}
+              disabled={!selectedClientId}
+              label="關聯案件"
+            />
           </FormGrid>
           <div>
             <label htmlFor="record" className={labelClass}>

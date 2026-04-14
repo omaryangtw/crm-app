@@ -196,6 +196,8 @@ model Case {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  contacts Contact[]
+
   @@map("cases")
 }
 
@@ -210,9 +212,14 @@ model Contact {
 
   clientId  Int      @map("client_id")
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  caseId    Int?     @map("case_id")
+  case      Case?    @relation(fields: [caseId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([caseId])
   @@map("contacts")
 }
 

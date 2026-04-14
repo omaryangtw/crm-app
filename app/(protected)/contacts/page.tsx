@@ -40,6 +40,7 @@ export default async function ContactsPage({ searchParams }: Props) {
     include: {
       client: { select: { id: true, name: true } },
       staffInCharge: { select: { id: true, name: true } },
+      case: { select: { id: true, name: true } },
     },
   });
 

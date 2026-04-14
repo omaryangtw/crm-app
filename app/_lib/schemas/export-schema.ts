@@ -1,12 +1,14 @@
 import { z } from "zod";
 
+const coerceBool = z.preprocess((v) => v === "true" || v === "on" || v === true, z.boolean());
+
 export const exportQuerySchema = z.object({
-  isDead: z.boolean().optional(),
+  isDead: coerceBool.optional(),
   disabledStatus: z.enum(["light", "mid", "heavy", "any"]).optional(),
   incomeStatus: z.enum(["low", "mid_low", "mid_low_elderly", "any"]).optional(),
-  canCall: z.boolean().optional(),
-  canMail: z.boolean().optional(),
-  householdAdmin: z.boolean().optional(),
+  canCall: coerceBool.optional(),
+  canMail: coerceBool.optional(),
+  householdAdmin: coerceBool.optional(),
   sex: z.enum(["male", "female"]).optional(),
   ageMin: z.number().int().optional(),
   ageMax: z.number().int().optional(),

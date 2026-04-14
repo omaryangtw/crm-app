@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/app/_lib/db";
+import { auth } from "@/app/_lib/auth";
 import {
   CASE_STATUS_LABELS,
   CASE_TYPE_MAJOR_LABELS,
@@ -17,6 +18,7 @@ import { InfoGrid } from "@/app/_components/info-grid";
 import { SectionCard } from "@/app/_components/section-card";
 import { DeleteCaseButton } from "./delete-case-button";
 import HistoryViewer from "@/app/_components/history-viewer";
+import { CaseContactsSection } from "./_components/case-contacts-section";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -27,9 +29,20 @@ export default async function CaseDetailPage({ params }: Props) {
   const caseId = Number(id);
   if (Number.isNaN(caseId)) notFound();
 
+  const session = await auth();
+  const sessionStaffId = session?.user?.staffId ?? null;
+
   const caseRecord = await prisma.case.findUnique({
     where: { id: caseId },
-    include: { client: true, staffInCharge: { select: { id: true, name: true } } },
+    include: {
+      client: true,
+      staffInCharge: { select: { id: true, name: true } },
+      contacts: {
+        where: { caseId },
+        orderBy: { date: "desc" },
+        include: { staffInCharge: { select: { id: true, name: true } } },
+      },
+    },
   });
 
   if (!caseRecord) notFound();
@@ -117,6 +130,14 @@ export default async function CaseDetailPage({ params }: Props) {
             <p className="text-sm whitespace-pre-wrap">{caseRecord.handle}</p>
           </SectionCard>
         )}
+
+        {/* Contact timeline */}
+        <CaseContactsSection
+          caseId={caseRecord.id}
+          clientId={caseRecord.clientId}
+          sessionStaffId={sessionStaffId}
+          contacts={caseRecord.contacts}
+        />
       </CardStack>
 
       <HistoryViewer entityType="Case" entityId={caseRecord.id} />

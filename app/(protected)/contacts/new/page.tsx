@@ -6,7 +6,7 @@ import { PageHeader } from "@/app/_components/page-header";
 import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 
 interface Props {
-  searchParams: Promise<{ clientId?: string }>;
+  searchParams: Promise<{ clientId?: string; caseId?: string }>;
 }
 
 export default async function NewContactPage({ searchParams }: Props) {
@@ -14,6 +14,7 @@ export default async function NewContactPage({ searchParams }: Props) {
   const session = await auth();
   const sessionStaffId = session?.user?.staffId ?? null;
   const clientId = params.clientId ? Number(params.clientId) : undefined;
+  const caseId = params.caseId ? Number(params.caseId) : undefined;
 
   return (
     <PageContainer size="narrow">
@@ -23,6 +24,7 @@ export default async function NewContactPage({ searchParams }: Props) {
         onSubmitAction={createContact}
         submitLabel="新增"
         clientId={clientId}
+        caseId={caseId}
         sessionStaffId={sessionStaffId}
       />
     </PageContainer>

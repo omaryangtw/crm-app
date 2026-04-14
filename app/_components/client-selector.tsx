@@ -27,6 +27,8 @@ interface ClientSelectorProps {
   label?: string;
   /** Validation error message */
   error?: string;
+  /** Callback when selected client changes */
+  onClientChange?: (clientId: number | null) => void;
 }
 
 export default function ClientSelector({
@@ -34,6 +36,7 @@ export default function ClientSelector({
   defaultValue,
   label = "關聯族人",
   error,
+  onClientChange,
 }: ClientSelectorProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -57,6 +60,7 @@ export default function ClientSelector({
         const clientName = await getClientNameById(defaultValue);
         if (clientName) {
           setSelectedClient({ id: defaultValue, name: clientName });
+          onClientChange?.(defaultValue);
         }
       })();
     }
@@ -84,6 +88,7 @@ export default function ClientSelector({
     setOpen(false);
     setSearch("");
     setResults([]);
+    onClientChange?.(client.id);
   };
 
   const displayText = selectedClient

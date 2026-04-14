@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { prisma } from "@/app/_lib/db";
+import { auth } from "@/app/_lib/auth";
 import { computeBirthdayFields } from "@/app/_lib/utils/date-utils";
 import {
   SEX_LABELS,
@@ -11,7 +12,6 @@ import {
   PLAIN_MOUNTAIN_LABELS,
   CASE_STATUS_LABELS,
   CASE_TYPE_MAJOR_LABELS,
-  CONTACT_TYPE_LABELS,
 } from "@/app/_lib/constants/enums";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -28,13 +28,13 @@ import { PageContainer } from "@/app/_components/page-container";
 import { PageHeader } from "@/app/_components/page-header";
 import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 import { InfoRow } from "@/app/_components/info-row";
-import { ExpandableText } from "@/app/_components/expandable-text";
 import { DetailLayout } from "@/app/_components/detail-layout";
 import { CardStack } from "@/app/_components/card-stack";
 import { InfoGrid } from "@/app/_components/info-grid";
 import { SectionCard } from "@/app/_components/section-card";
 import { DeleteClientButton } from "./delete-client-button";
 import { FamilySection } from "./_components/family-section";
+import { ContactsSection } from "./_components/contacts-section";
 import HistoryViewer from "@/app/_components/history-viewer";
 
 interface Props {
@@ -46,6 +46,9 @@ export default async function ClientDetailPage({ params }: Props) {
   const clientId = Number(id);
   if (Number.isNaN(clientId)) notFound();
 
+  const session = await auth();
+  const sessionStaffId = session?.user?.staffId ?? null;
+
   const client = await prisma.client.findUnique({
     where: { id: clientId },
     include: {
@@ -54,7 +57,10 @@ export default async function ClientDetailPage({ params }: Props) {
       },
       contacts: {
         orderBy: [{ date: "asc" }, { createdAt: "asc" }],
-        include: { staffInCharge: { select: { id: true, name: true } } },
+        include: {
+          staffInCharge: { select: { id: true, name: true } },
+          case: { select: { id: true, name: true } },
+        },
       },
       familyRelationsAsA: { include: { personB: true } },
       familyRelationsAsB: { include: { personA: true } },
@@ -281,50 +287,12 @@ export default async function ClientDetailPage({ params }: Props) {
           )}
       </SectionCard>
 
-      {/* Contacts section */}
-      <SectionCard
-        className="mb-8"
-        title="通聯紀錄"
-        count={client.contacts.length}
-        action={
-          <Link href={`/contacts/new?clientId=${client.id}`}>
-            <Button size="sm">新增通聯</Button>
-          </Link>
-        }
-      >
-          {client.contacts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">尚無通聯紀錄</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>日期</TableHead>
-                  <TableHead>類型</TableHead>
-                  <TableHead>成功</TableHead>
-                  <TableHead>紀錄</TableHead>
-                  <TableHead>承辦人</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {client.contacts.map((ct) => (
-                  <TableRow key={ct.id}>
-                    <TableCell>
-                      {ct.date ? format(ct.date, "yyyy-MM-dd") : "-"}
-                    </TableCell>
-                    <TableCell>
-                      {ct.contactType ? CONTACT_TYPE_LABELS[ct.contactType] : "-"}
-                    </TableCell>
-                    <TableCell>{ct.isSuccess ? "是" : "否"}</TableCell>
-                    <TableCell>
-                      {ct.record ? <ExpandableText text={ct.record} /> : "-"}
-                    </TableCell>
-                    <TableCell>{ct.staffInCharge.map((s) => s.name).join(", ") || "-"}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-      </SectionCard>
+      {/* Contacts section — interactive client component with quick contact toggle */}
+      <ContactsSection
+        clientId={client.id}
+        sessionStaffId={sessionStaffId}
+        contacts={client.contacts}
+      />
 
       {/* Family relations section — interactive client component */}
       <FamilySection clientId={client.id} familyMembers={familyMembers} />

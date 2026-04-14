@@ -197,3 +197,13 @@ export async function deleteCase(
 
   return { success: true, data: null };
 }
+
+export async function getCasesByClientId(
+  clientId: number
+): Promise<{ id: number; name: string | null; status: string | null }[]> {
+  return prisma.case.findMany({
+    where: { clientId },
+    select: { id: true, name: true, status: true },
+    orderBy: { createdAt: "desc" },
+  });
+}

@@ -25,6 +25,7 @@ export default async function ContactDetailPage({ params }: Props) {
     include: {
       client: { select: { id: true, name: true } },
       staffInCharge: { select: { id: true, name: true } },
+      case: { select: { id: true, name: true } },
     },
   });
 
@@ -91,6 +92,11 @@ export default async function ContactDetailPage({ params }: Props) {
               value={
                 contact.staffInCharge.map((s) => s.name).join(", ") || null
               }
+            />
+            <InfoRow
+              label="關聯案件"
+              value={contact.case?.name ?? null}
+              href={contact.case ? `/cases/${contact.case.id}` : undefined}
             />
           </InfoGrid>
         </CardContent>

@@ -19,6 +19,7 @@ export async function createContact(
   const parsed = contactCreateSchema.safeParse({
     ...raw,
     clientId: raw.clientId ? Number(raw.clientId) : undefined,
+    caseId: raw.caseId ? Number(raw.caseId) : undefined,
     staffInChargeIds: raw.staffInChargeIds ?? undefined,
     isSuccess: raw.isSuccess === "true" || raw.isSuccess === "on" ? true : raw.isSuccess === "false" ? false : true,
   });
@@ -31,7 +32,19 @@ export async function createContact(
     };
   }
 
-  const { clientId, staffInChargeIds, ...rest } = parsed.data;
+  const { clientId, staffInChargeIds, caseId, ...rest } = parsed.data;
+
+  // Validate caseId points to an existing Case
+  if (caseId) {
+    const caseExists = await prisma.case.findUnique({
+      where: { id: caseId },
+      select: { id: true },
+    });
+    if (!caseExists) {
+      return { success: false, error: "指定的案件不存在" };
+    }
+  }
+
   const sanitized = sanitizeObject(rest as Record<string, unknown>);
 
   let contact: Awaited<ReturnType<typeof prisma.contact.create>> | null = null;
@@ -40,12 +53,17 @@ export async function createContact(
       data: {
         ...sanitized,
         clientId,
+        caseId: caseId ?? null,
         staffInCharge: {
           connect: (staffInChargeIds ?? []).map((id) => ({ id })),
         },
       },
     });
     revalidatePath("/contacts");
+    revalidatePath(`/clients/${clientId}`);
+    if (caseId) {
+      revalidatePath(`/cases/${caseId}`);
+    }
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === "P2025") {

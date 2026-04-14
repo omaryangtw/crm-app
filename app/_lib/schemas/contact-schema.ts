@@ -23,10 +23,11 @@ const coerceStaffInChargeIds = z
 export const contactCreateSchema = z.object({
   date: z.coerce.date().optional().nullable(),
   contactType: z.enum(["outgoing", "incoming", "visit", "sms"]).optional().nullable(),
-  isSuccess: z.boolean().default(true),
+  isSuccess: z.preprocess((v) => v === "true" || v === "on" || v === true, z.boolean()).default(true),
   record: z.string().optional().nullable(),
   staffInChargeIds: coerceStaffInChargeIds,
   clientId: z.number().int("通聯紀錄必須關聯族人"),
+  caseId: z.number().int().positive().optional().nullable(),
 });
 
 export type ContactCreateInput = z.infer<typeof contactCreateSchema>;
