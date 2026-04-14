@@ -1,24 +1,5 @@
 import { z } from "zod";
-
-/**
- * Coerce a FormData comma-separated string value to an array of integers.
- * Empty string / whitespace → [], otherwise split and parse each as integer.
- */
-const coerceStaffInChargeIds = z
-  .union([z.array(z.number().int()), z.string(), z.null()])
-  .optional()
-  .transform((val): number[] => {
-    if (val === null || val === undefined) return [];
-    if (Array.isArray(val)) return val;
-    const trimmed = val.trim();
-    if (trimmed === "") return [];
-    return trimmed
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s !== "")
-      .map(Number)
-      .filter((n) => Number.isInteger(n) && !Number.isNaN(n));
-  });
+import { coerceStaffInChargeIds } from "./contact-schema";
 
 export const caseCreateSchema = z.object({
   name: z.string().optional().nullable(),

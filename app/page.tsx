@@ -26,6 +26,7 @@ export default async function Home() {
         orderBy: { date: "asc" },
         include: {
           client: { select: { id: true, name: true } },
+          staffInCharge: { select: { id: true, name: true } },
         },
       }),
       prisma.client.count(),
@@ -55,6 +56,7 @@ export default async function Home() {
     date: t.date ? format(t.date, "yyyy-MM-dd") : null,
     note: t.note,
     client: { id: t.client.id, name: t.client.name },
+    staffInCharge: t.staffInCharge.map((s) => ({ id: s.id, name: s.name })),
   }));
 
   return (
@@ -94,7 +96,7 @@ export default async function Home() {
         <RecentActivity items={recentActivity} />
       </div>
 
-      <TodoDashboard todos={serialized} />
+      <TodoDashboard todos={serialized} sessionStaffId={sessionStaffId} />
     </PageContainer>
   );
 }

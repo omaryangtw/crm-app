@@ -170,6 +170,7 @@ model Staff {
 
   cases    Case[]
   contacts Contact[]
+  todos    Todo[]
   user     User?
 
   @@map("staff")
@@ -230,10 +231,11 @@ model Todo {
   done Boolean   @default(false)
   note String?
 
-  clientId  Int      @map("client_id")
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  clientId      Int      @map("client_id")
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  staffInCharge Staff[]
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@map("todos")
 }

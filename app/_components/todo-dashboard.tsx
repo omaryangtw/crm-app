@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import Link from "next/link";
 import { completeTodo, deleteTodo } from "@/app/_lib/actions/todo-actions";
+import { filterTodos, formatStaffNames } from "@/app/_lib/utils/todo-utils";
 import { Button } from "@/components/ui/button";
 
 interface TodoItem {
@@ -13,15 +14,24 @@ interface TodoItem {
     id: number;
     name: string | null;
   };
+  staffInCharge: { id: number; name: string }[];
 }
 
 interface TodoDashboardProps {
   todos: TodoItem[];
+  sessionStaffId: number | null;
 }
 
-export function TodoDashboard({ todos }: TodoDashboardProps) {
+export function TodoDashboard({ todos, sessionStaffId }: TodoDashboardProps) {
   const [selectedTodo, setSelectedTodo] = useState<TodoItem | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [filterMode, setFilterMode] = useState<"mine" | "all">(
+    sessionStaffId != null ? "mine" : "all"
+  );
+
+  const filteredTodos = useMemo(() => {
+    return filterTodos(todos, sessionStaffId, filterMode);
+  }, [todos, filterMode, sessionStaffId]);
 
   function handleComplete(todoId: number) {
     startTransition(async () => {
@@ -46,16 +56,33 @@ export function TodoDashboard({ todos }: TodoDashboardProps) {
       {/* Todo list */}
       <div className="flex-1">
         <div className="bg-card rounded-lg shadow">
-          <div className="px-4 py-3 border-b border-border">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <h2 className="font-heading text-base leading-snug font-medium">待辦事項</h2>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={filterMode === "mine" ? "default" : "outline"}
+                size="sm"
+                disabled={sessionStaffId == null}
+                onClick={() => setFilterMode("mine")}
+              >
+                我的待辦
+              </Button>
+              <Button
+                variant={filterMode === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilterMode("all")}
+              >
+                全部待辦
+              </Button>
+            </div>
           </div>
-          {todos.length === 0 ? (
+          {filteredTodos.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               目前沒有待辦事項
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {todos.map((todo) => (
+              {filteredTodos.map((todo) => (
                 <div
                   key={todo.id}
                   className="flex items-center justify-between px-4 py-3 hover:bg-muted/50"
@@ -70,6 +97,9 @@ export function TodoDashboard({ todos }: TodoDashboardProps) {
                     >
                       {todo.client.name ?? "未命名"}
                     </Link>
+                    <span className="text-sm text-muted-foreground truncate">
+                      {formatStaffNames(todo.staffInCharge)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
                     <Button
@@ -132,6 +162,10 @@ export function TodoDashboard({ todos }: TodoDashboardProps) {
                     {selectedTodo.client.name ?? "未命名"}
                   </Link>
                 </p>
+              </div>
+              <div>
+                <span className="text-sm text-muted-foreground">承辦人</span>
+                <p>{formatStaffNames(selectedTodo.staffInCharge)}</p>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">備註</span>

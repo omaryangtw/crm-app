@@ -4,7 +4,7 @@ import { z } from "zod";
  * Coerce a FormData comma-separated string value to an array of integers.
  * Empty string / whitespace → [], otherwise split and parse each as integer.
  */
-const coerceStaffInChargeIds = z
+export const coerceStaffInChargeIds = z
   .union([z.array(z.number().int()), z.string(), z.null()])
   .optional()
   .transform((val): number[] => {
