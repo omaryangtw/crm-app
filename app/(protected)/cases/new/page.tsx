@@ -1,16 +1,19 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
+import { auth } from "@/app/_lib/auth";
 import { createCase } from "@/app/_lib/actions/case-actions";
 import CaseForm from "../_components/case-form";
 import { PageContainer } from "@/app/_components/page-container";
 import { PageHeader } from "@/app/_components/page-header";
 import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 
-export default function NewCasePage() {
-  const searchParams = useSearchParams();
-  const clientIdParam = searchParams.get("clientId");
-  const clientId = clientIdParam ? Number(clientIdParam) : undefined;
+interface Props {
+  searchParams: Promise<{ clientId?: string }>;
+}
+
+export default async function NewCasePage({ searchParams }: Props) {
+  const params = await searchParams;
+  const session = await auth();
+  const sessionStaffId = session?.user?.staffId ?? null;
+  const clientId = params.clientId ? Number(params.clientId) : undefined;
 
   return (
     <PageContainer size="narrow">
@@ -20,6 +23,7 @@ export default function NewCasePage() {
         onSubmitAction={createCase}
         submitLabel="新增"
         clientId={clientId}
+        sessionStaffId={sessionStaffId}
       />
     </PageContainer>
   );

@@ -1,12 +1,16 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getStaffById } from "@/app/_lib/actions/staff-actions";
+import { auth } from "@/app/_lib/auth";
+import { prisma } from "@/app/_lib/db";
 import { DeactivateStaffButton } from "./deactivate-staff-button";
+import StaffBindingSection from "./_components/staff-binding-section";
 import { PageContainer } from "@/app/_components/page-container";
 import { PageHeader } from "@/app/_components/page-header";
 import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 import { InfoRow } from "@/app/_components/info-row";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardStack } from "@/app/_components/card-stack";
 import { InfoGrid } from "@/app/_components/info-grid";
 import { Button } from "@/components/ui/button";
 
@@ -21,6 +25,19 @@ export default async function StaffDetailPage({ params }: Props) {
 
   const staff = await getStaffById(staffId);
   if (!staff) notFound();
+
+  const session = await auth();
+  const isAdmin = session?.user?.role === "admin";
+
+  // Query the User bound to this Staff (if any)
+  let boundUser: { id: number; email: string } | null = null;
+  if (isAdmin) {
+    const user = await prisma.user.findUnique({
+      where: { staffId },
+      select: { id: true, email: true },
+    });
+    boundUser = user;
+  }
 
   return (
     <PageContainer size="narrow">
@@ -44,32 +61,39 @@ export default async function StaffDetailPage({ params }: Props) {
         }
       />
 
-      {/* Staff details */}
-      <Card>
-        <CardHeader>
-          <CardTitle>員工資料</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <InfoGrid className="text-sm">
-            <InfoRow label="姓名" value={staff.name} />
-            <InfoRow label="別名" value={staff.aliases.length > 0 ? staff.aliases.join(", ") : null} />
-            <InfoRow label="電子郵件" value={staff.email} />
-            <InfoRow label="電話" value={staff.phone} />
-            <InfoRow
-              label="狀態"
-              value={staff.isActive ? "啟用" : "已停用"}
-            />
-            <InfoRow
-              label="建立時間"
-              value={staff.createdAt.toLocaleString("zh-TW")}
-            />
-            <InfoRow
-              label="更新時間"
-              value={staff.updatedAt.toLocaleString("zh-TW")}
-            />
-          </InfoGrid>
-        </CardContent>
-      </Card>
+      <CardStack>
+        {/* Staff details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>員工資料</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <InfoGrid className="text-sm">
+              <InfoRow label="姓名" value={staff.name} />
+              <InfoRow label="別名" value={staff.aliases.length > 0 ? staff.aliases.join(", ") : null} />
+              <InfoRow label="電子郵件" value={staff.email} />
+              <InfoRow label="電話" value={staff.phone} />
+              <InfoRow
+                label="狀態"
+                value={staff.isActive ? "啟用" : "已停用"}
+              />
+              <InfoRow
+                label="建立時間"
+                value={staff.createdAt.toLocaleString("zh-TW")}
+              />
+              <InfoRow
+                label="更新時間"
+                value={staff.updatedAt.toLocaleString("zh-TW")}
+              />
+            </InfoGrid>
+          </CardContent>
+        </Card>
+
+        {/* Binding section — admin only */}
+        {isAdmin && (
+          <StaffBindingSection staffId={staffId} boundUser={boundUser} />
+        )}
+      </CardStack>
     </PageContainer>
   );
 }

@@ -1,15 +1,19 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
+import { auth } from "@/app/_lib/auth";
 import { createContact } from "@/app/_lib/actions/contact-actions";
 import ContactForm from "../_components/contact-form";
 import { PageContainer } from "@/app/_components/page-container";
 import { PageHeader } from "@/app/_components/page-header";
 import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 
-export default function NewContactPage() {
-  const searchParams = useSearchParams();
-  const clientId = searchParams.get("clientId");
+interface Props {
+  searchParams: Promise<{ clientId?: string }>;
+}
+
+export default async function NewContactPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const session = await auth();
+  const sessionStaffId = session?.user?.staffId ?? null;
+  const clientId = params.clientId ? Number(params.clientId) : undefined;
 
   return (
     <PageContainer size="narrow">
@@ -18,7 +22,8 @@ export default function NewContactPage() {
       <ContactForm
         onSubmitAction={createContact}
         submitLabel="新增"
-        clientId={clientId ? Number(clientId) : undefined}
+        clientId={clientId}
+        sessionStaffId={sessionStaffId}
       />
     </PageContainer>
   );

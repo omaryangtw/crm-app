@@ -32,6 +32,8 @@ interface CaseFormProps {
   submitLabel: string;
   /** Pre-filled clientId (for create from client detail) */
   clientId?: number;
+  /** 當前登入使用者綁定的 staffId，用於新增時自動預填 */
+  sessionStaffId?: number | null;
 }
 
 const selectClass =
@@ -66,7 +68,7 @@ function SelectField({
   );
 }
 
-export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, clientId }: CaseFormProps) {
+export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, clientId, sessionStaffId }: CaseFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -161,7 +163,7 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
               registration={register("status")}
               error={errors.status?.message}
             />
-            <StaffSelector name="staffInChargeIds" defaultValue={defaultValues?.staffInChargeIds ?? []} />
+            <StaffSelector name="staffInChargeIds" defaultValue={defaultValues?.staffInChargeIds ?? (sessionStaffId ? [sessionStaffId] : [])} />
             <SelectField
               id="typesMajor"
               label="案件大類"

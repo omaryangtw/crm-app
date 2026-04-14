@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/app/_components/page-container";
 import { PageHeader } from "@/app/_components/page-header";
 import { getStaffList } from "@/app/_lib/actions/staff-actions";
+import { auth } from "@/app/_lib/auth";
+import { getAutoBindCandidates } from "@/app/_lib/actions/binding-actions";
+import AutoBindBanner from "./_components/auto-bind-banner";
 import { StaffTable } from "./staff-table";
 
 interface Props {
@@ -15,6 +18,10 @@ export default async function StaffPage({ searchParams }: Props) {
   const q = params.q;
 
   const staff = await getStaffList(q || undefined);
+
+  const session = await auth();
+  const isAdmin = session?.user?.role === "admin";
+  const candidates = isAdmin ? await getAutoBindCandidates() : [];
 
   return (
     <PageContainer>
@@ -29,6 +36,9 @@ export default async function StaffPage({ searchParams }: Props) {
           </Link>
         }
       />
+      {isAdmin && candidates.length > 0 && (
+        <AutoBindBanner candidateCount={candidates.length} />
+      )}
       <StaffTable staff={staff} searchQuery={q} />
     </PageContainer>
   );

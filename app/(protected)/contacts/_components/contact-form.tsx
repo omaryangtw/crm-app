@@ -30,6 +30,8 @@ interface ContactFormProps {
   submitLabel: string;
   /** Pre-filled clientId (for create from client detail) */
   clientId?: number;
+  /** 當前登入使用者綁定的 staffId，用於新增時自動預填 */
+  sessionStaffId?: number | null;
 }
 
 const selectClass =
@@ -42,6 +44,7 @@ export default function ContactForm({
   onSubmitAction,
   submitLabel,
   clientId,
+  sessionStaffId,
 }: ContactFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -169,7 +172,7 @@ export default function ContactForm({
             </div>
             <StaffSelector
               name="staffInChargeIds"
-              defaultValue={defaultValues?.staffInChargeIds ?? []}
+              defaultValue={defaultValues?.staffInChargeIds ?? (sessionStaffId ? [sessionStaffId] : [])}
             />
             <div className="flex items-center gap-2">
               <input

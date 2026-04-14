@@ -22,7 +22,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.password
         );
         if (!valid) return null;
-        return { id: user.id.toString(), email: user.email, role: user.role };
+        return { id: user.id.toString(), email: user.email, role: user.role, staffId: user.staffId };
       },
     }),
   ],
@@ -31,11 +31,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     jwt({ token, user }) {
       if (user) {
         token.role = (user as { role: string }).role;
+        token.staffId = (user as { staffId?: number | null }).staffId ?? null;
       }
       return token;
     },
     session({ session, token }) {
       session.user.role = token.role as string;
+      session.user.staffId = (token.staffId as number | null) ?? null;
       return session;
     },
   },
