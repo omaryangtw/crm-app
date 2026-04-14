@@ -21,6 +21,7 @@ import {
 } from "@/app/_lib/constants/enums";
 import StaffSelector from "@/app/_components/staff-selector";
 import ClientSelector from "@/app/_components/client-selector";
+import { FormGrid } from "@/app/_components/form-grid";
 
 type CaseFormValues = z.input<typeof caseCreateSchema>;
 
@@ -147,7 +148,7 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
           <CardTitle>案件資料</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             <div>
               <label htmlFor="name" className={labelClass}>案件名稱</label>
               <Input id="name" type="text" {...register("name")} />
@@ -175,7 +176,7 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
               registration={register("typesMinor")}
               error={errors.typesMinor?.message}
             />
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 
@@ -185,7 +186,7 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
           <CardTitle>關係人</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             <div>
               <label htmlFor="relation1" className={labelClass}>關係人 1</label>
               <Input id="relation1" type="text" {...register("relation1")} />
@@ -198,7 +199,7 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
               <label htmlFor="relation3" className={labelClass}>關係人 3</label>
               <Input id="relation3" type="text" {...register("relation3")} />
             </div>
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 
@@ -208,7 +209,7 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
           <CardTitle>聯絡人</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             <div>
               <label htmlFor="contact1" className={labelClass}>聯絡人 1</label>
               <Input id="contact1" type="text" {...register("contact1")} />
@@ -221,7 +222,7 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
               <label htmlFor="contact3" className={labelClass}>聯絡人 3</label>
               <Input id="contact3" type="text" {...register("contact3")} />
             </div>
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 

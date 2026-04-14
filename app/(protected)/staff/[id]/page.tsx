@@ -7,6 +7,7 @@ import { PageHeader } from "@/app/_components/page-header";
 import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 import { InfoRow } from "@/app/_components/info-row";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InfoGrid } from "@/app/_components/info-grid";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -49,7 +50,7 @@ export default async function StaffDetailPage({ params }: Props) {
           <CardTitle>員工資料</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+          <InfoGrid className="text-sm">
             <InfoRow label="姓名" value={staff.name} />
             <InfoRow label="別名" value={staff.aliases.length > 0 ? staff.aliases.join(", ") : null} />
             <InfoRow label="電子郵件" value={staff.email} />
@@ -66,7 +67,7 @@ export default async function StaffDetailPage({ params }: Props) {
               label="更新時間"
               value={staff.updatedAt.toLocaleString("zh-TW")}
             />
-          </div>
+          </InfoGrid>
         </CardContent>
       </Card>
     </PageContainer>

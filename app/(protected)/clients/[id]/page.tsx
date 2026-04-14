@@ -29,6 +29,10 @@ import { PageHeader } from "@/app/_components/page-header";
 import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 import { InfoRow } from "@/app/_components/info-row";
 import { ExpandableText } from "@/app/_components/expandable-text";
+import { DetailLayout } from "@/app/_components/detail-layout";
+import { CardStack } from "@/app/_components/card-stack";
+import { InfoGrid } from "@/app/_components/info-grid";
+import { SectionCard } from "@/app/_components/section-card";
 import { DeleteClientButton } from "./delete-client-button";
 import { FamilySection } from "./_components/family-section";
 import HistoryViewer from "@/app/_components/history-viewer";
@@ -99,9 +103,8 @@ export default async function ClientDetailPage({ params }: Props) {
       />
 
       {/* Two-column layout: left = photo + basic info, right = contact cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {/* Left column */}
-        <div className="md:col-span-1 space-y-4">
+      <DetailLayout className="mb-8" sidebar={
+        <div className="space-y-4">
           {/* Photo placeholder */}
           <div className="bg-muted rounded-lg p-4 flex items-center justify-center min-h-[200px]">
             <div className="text-center text-muted-foreground">
@@ -151,16 +154,15 @@ export default async function ClientDetailPage({ params }: Props) {
             </CardContent>
           </Card>
         </div>
-
-        {/* Right column — split into separate cards */}
-        <div className="md:col-span-3 space-y-4">
+      }>
+        <CardStack>
           {/* Card 1: 聯絡方式 */}
           <Card>
             <CardHeader>
               <CardTitle>聯絡方式</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+              <InfoGrid className="text-sm">
                 <InfoRow label="電話可否" value={client.canCall ? "可" : "不可"} />
                 <InfoRow label="郵寄可否" value={client.canMail ? "可" : "不可"} />
                 <InfoRow label="手機" value={client.mobile} />
@@ -171,7 +173,7 @@ export default async function ClientDetailPage({ params }: Props) {
                 <InfoRow label="電話備註" value={client.phoneNote} />
                 <InfoRow label="電話2" value={client.phoneAlt} />
                 <InfoRow label="電話2備註" value={client.phoneAltNote} />
-              </div>
+              </InfoGrid>
             </CardContent>
           </Card>
 
@@ -181,13 +183,13 @@ export default async function ClientDetailPage({ params }: Props) {
               <CardTitle>地址</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+              <InfoGrid className="text-sm">
                 <InfoRow label="城市" value={client.city} />
                 <InfoRow label="區域" value={client.dist} />
                 <InfoRow label="里" value={client.vill} />
                 <InfoRow label="地址" value={client.addr} />
                 <InfoRow label="地址備註" value={client.addrNote} />
-              </div>
+              </InfoGrid>
             </CardContent>
           </Card>
 
@@ -198,13 +200,13 @@ export default async function ClientDetailPage({ params }: Props) {
                 <CardTitle>第二地址</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                <InfoGrid className="text-sm">
                   <InfoRow label="城市" value={client.cityAlt} />
                   <InfoRow label="區域" value={client.distAlt} />
                   <InfoRow label="里" value={client.villAlt} />
                   <InfoRow label="地址" value={client.addrAlt} />
                   <InfoRow label="地址備註" value={client.addrAltNote} />
-                </div>
+                </InfoGrid>
               </CardContent>
             </Card>
           )}
@@ -220,18 +222,20 @@ export default async function ClientDetailPage({ params }: Props) {
               </CardContent>
             </Card>
           )}
-        </div>
-      </div>
+        </CardStack>
+      </DetailLayout>
 
       {/* Cases section */}
-      <Card className="mb-8">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>案件紀錄 ({client.cases.length})</CardTitle>
+      <SectionCard
+        className="mb-8"
+        title="案件紀錄"
+        count={client.cases.length}
+        action={
           <Link href={`/cases/new?clientId=${client.id}`}>
             <Button size="sm">新增案件</Button>
           </Link>
-        </CardHeader>
-        <CardContent>
+        }
+      >
           {client.cases.length === 0 ? (
             <p className="text-sm text-muted-foreground">尚無案件紀錄</p>
           ) : (
@@ -275,18 +279,19 @@ export default async function ClientDetailPage({ params }: Props) {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+      </SectionCard>
 
       {/* Contacts section */}
-      <Card className="mb-8">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>通聯紀錄 ({client.contacts.length})</CardTitle>
+      <SectionCard
+        className="mb-8"
+        title="通聯紀錄"
+        count={client.contacts.length}
+        action={
           <Link href={`/contacts/new?clientId=${client.id}`}>
             <Button size="sm">新增通聯</Button>
           </Link>
-        </CardHeader>
-        <CardContent>
+        }
+      >
           {client.contacts.length === 0 ? (
             <p className="text-sm text-muted-foreground">尚無通聯紀錄</p>
           ) : (
@@ -319,8 +324,7 @@ export default async function ClientDetailPage({ params }: Props) {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+      </SectionCard>
 
       {/* Family relations section — interactive client component */}
       <FamilySection clientId={client.id} familyMembers={familyMembers} />

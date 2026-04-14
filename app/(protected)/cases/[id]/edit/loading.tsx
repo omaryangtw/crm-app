@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { FormGrid } from "@/app/_components/form-grid";
 
 export default function EditCaseLoading() {
   return (
@@ -28,14 +29,14 @@ export default function EditCaseLoading() {
           <Skeleton className="h-5 w-24" />
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-8 w-full" />
               </div>
             ))}
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 
@@ -45,14 +46,14 @@ export default function EditCaseLoading() {
           <Skeleton className="h-5 w-24" />
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="space-y-2">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-8 w-full" />
               </div>
             ))}
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 

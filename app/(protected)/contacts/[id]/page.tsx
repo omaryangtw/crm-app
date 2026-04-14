@@ -7,6 +7,7 @@ import { PageContainer } from "@/app/_components/page-container";
 import { PageHeader } from "@/app/_components/page-header";
 import { BreadcrumbNav } from "@/app/_components/breadcrumb-nav";
 import { InfoRow } from "@/app/_components/info-row";
+import { InfoGrid } from "@/app/_components/info-grid";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -67,7 +68,7 @@ export default async function ContactDetailPage({ params }: Props) {
           <CardTitle>通聯資料</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+          <InfoGrid className="text-sm">
             <InfoRow
               label="日期"
               value={
@@ -91,7 +92,7 @@ export default async function ContactDetailPage({ params }: Props) {
                 contact.staffInCharge.map((s) => s.name).join(", ") || null
               }
             />
-          </div>
+          </InfoGrid>
         </CardContent>
       </Card>
 

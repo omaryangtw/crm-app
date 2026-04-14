@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer } from "@/app/_components/page-container";
+import { InfoGrid } from "@/app/_components/info-grid";
 
 export default function CaseDetailLoading() {
   return (
@@ -19,27 +20,27 @@ export default function CaseDetailLoading() {
       {/* Case details card */}
       <div className="rounded-lg border p-4 mb-6 space-y-3">
         <Skeleton className="h-5 w-24 mb-2" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+        <InfoGrid>
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex justify-between">
               <Skeleton className="h-4 w-20" />
               <Skeleton className="h-4 w-28" />
             </div>
           ))}
-        </div>
+        </InfoGrid>
       </div>
 
       {/* Relations card */}
       <div className="rounded-lg border p-4 mb-6 space-y-3">
         <Skeleton className="h-5 w-20 mb-2" />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-2">
+        <InfoGrid columns="3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="flex justify-between">
               <Skeleton className="h-4 w-16" />
               <Skeleton className="h-4 w-24" />
             </div>
           ))}
-        </div>
+        </InfoGrid>
       </div>
 
       {/* Notes card */}

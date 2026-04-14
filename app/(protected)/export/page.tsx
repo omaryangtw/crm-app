@@ -6,6 +6,7 @@ import { exportClients } from "@/app/_lib/actions/export-actions";
 import { EXPORT_PRESETS } from "@/app/_lib/utils/export-utils";
 import type { ExportCriteria, ExportQuery } from "@/app/_lib/schemas/export-schema";
 import { Button } from "@/components/ui/button";
+import { FormGrid } from "@/app/_components/form-grid";
 
 const CLIENT_COLUMNS = [
   { key: "name", label: "姓名" },
@@ -172,7 +173,7 @@ export default function ExportPage() {
       {/* Custom export filters */}
       <div className="mb-6 rounded-md border border-border bg-card p-4">
         <h2 className="text-sm font-medium text-foreground mb-3">篩選條件</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <FormGrid>
           {/* Boolean filters */}
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -426,7 +427,7 @@ export default function ExportPage() {
               className="ml-2 w-28 rounded-md border border-input px-2 py-1 text-sm"
             />
           </label>
-        </div>
+        </FormGrid>
       </div>
 
       {/* Column selection */}

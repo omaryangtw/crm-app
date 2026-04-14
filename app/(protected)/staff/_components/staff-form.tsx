@@ -12,6 +12,7 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
+import { FormGrid } from "@/app/_components/form-grid";
 import { staffCreateSchema } from "@/app/_lib/schemas/staff-schema";
 import type { z } from "zod";
 
@@ -87,7 +88,7 @@ export default function StaffForm({
           <CardTitle>員工資料</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             <div>
               <label htmlFor="name" className={labelClass}>
                 姓名 *
@@ -138,7 +139,7 @@ export default function StaffForm({
                 {...register("aliases")}
               />
             </div>
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 

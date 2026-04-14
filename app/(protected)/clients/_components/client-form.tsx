@@ -15,6 +15,7 @@ import {
 import {
   clientCreateSchema,
 } from "@/app/_lib/schemas/client-schema";
+import { FormGrid } from "@/app/_components/form-grid";
 import type { z } from "zod";
 
 type ClientFormValues = z.input<typeof clientCreateSchema>;
@@ -145,7 +146,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
           <CardTitle>基本資料</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             <div>
               <label htmlFor="name" className={labelClass}>姓名 *</label>
               <Input id="name" type="text" {...register("name")} />
@@ -177,7 +178,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
               <CheckboxField id="isDead" label="已歿" registration={register("isDead")} />
               <CheckboxField id="householdAdmin" label="戶長" registration={register("householdAdmin")} />
             </div>
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 
@@ -190,7 +191,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
           <div className="mb-2">
             <CheckboxField id="canCall" label="可聯繫電話" registration={register("canCall")} />
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormGrid columns="2">
             <div>
               <label htmlFor="phone" className={labelClass}>電話</label>
               <Input id="phone" type="text" {...register("phone")} />
@@ -223,7 +224,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
               <label htmlFor="mobileAltNote" className={labelClass}>手機（備用）備註</label>
               <Input id="mobileAltNote" type="text" {...register("mobileAltNote")} />
             </div>
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 
@@ -236,7 +237,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
           <div className="mb-2">
             <CheckboxField id="canMail" label="可寄送郵件" registration={register("canMail")} />
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             <div>
               <label htmlFor="city" className={labelClass}>縣市</label>
               <Input id="city" type="text" {...register("city")} />
@@ -257,7 +258,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
               <label htmlFor="addrNote" className={labelClass}>地址備註</label>
               <Input id="addrNote" type="text" {...register("addrNote")} />
             </div>
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 
@@ -267,7 +268,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
           <CardTitle>備用地址</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             <div>
               <label htmlFor="cityAlt" className={labelClass}>縣市（備用）</label>
               <Input id="cityAlt" type="text" {...register("cityAlt")} />
@@ -288,7 +289,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
               <label htmlFor="addrAltNote" className={labelClass}>地址（備用）備註</label>
               <Input id="addrAltNote" type="text" {...register("addrAltNote")} />
             </div>
-          </div>
+          </FormGrid>
         </CardContent>
       </Card>
 

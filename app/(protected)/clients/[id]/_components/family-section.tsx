@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createFamilyRelation, deleteFamilyRelation } from "@/app/_lib/actions/family-actions";
 import { VALID_RELATIONSHIPS } from "@/app/_lib/constants/relationship-map";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SectionCard } from "@/app/_components/section-card";
 import {
   Table,
   TableBody,
@@ -68,9 +68,11 @@ export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
   }
 
   return (
-    <Card className="mb-8">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>家庭關係 ({familyMembers.length})</CardTitle>
+    <SectionCard
+      title="家庭關係"
+      count={familyMembers.length}
+      className="mb-8"
+      action={
         <Button
           type="button"
           size="sm"
@@ -78,8 +80,8 @@ export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
         >
           {showForm ? "取消" : "新增關係"}
         </Button>
-      </CardHeader>
-      <CardContent>
+      }
+    >
         {error && (
           <p className="text-sm text-destructive mb-2">{error}</p>
         )}
@@ -157,7 +159,6 @@ export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
             </TableBody>
           </Table>
         )}
-      </CardContent>
-    </Card>
+    </SectionCard>
   );
 }

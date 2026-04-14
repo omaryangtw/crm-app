@@ -17,6 +17,7 @@ import type { z } from "zod";
 import { CONTACT_TYPE_LABELS } from "@/app/_lib/constants/enums";
 import StaffSelector from "@/app/_components/staff-selector";
 import ClientSelector from "@/app/_components/client-selector";
+import { FormGrid } from "@/app/_components/form-grid";
 
 type ContactFormValues = z.input<typeof contactCreateSchema>;
 
@@ -138,7 +139,7 @@ export default function ContactForm({
           <CardTitle>通聯資料</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <FormGrid>
             <div>
               <label htmlFor="date" className={labelClass}>
                 日期
@@ -181,7 +182,7 @@ export default function ContactForm({
                 成功
               </label>
             </div>
-          </div>
+          </FormGrid>
           <div>
             <label htmlFor="record" className={labelClass}>
               紀錄
