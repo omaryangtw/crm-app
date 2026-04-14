@@ -148,6 +148,7 @@ model Client {
   cases    Case[]
   contacts Contact[]
   todos    Todo[]
+  photos   ClientPhoto[]
 
   // Family relations: this client as person A
   familyRelationsAsA FamilyRelation[] @relation("PersonA")
@@ -267,4 +268,17 @@ model AuditLog {
   @@index([userId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model ClientPhoto {
+  id                Int      @id @default(autoincrement())
+  clientId          Int      @map("client_id")
+  client            Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  photoPath         String   @map("photo_path")
+  originalPhotoPath String   @map("original_photo_path")
+  version           Int
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@index([clientId])
+  @@map("client_photos")
 }

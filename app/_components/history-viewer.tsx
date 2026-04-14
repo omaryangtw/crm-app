@@ -21,6 +21,69 @@ const ACTION_BADGE_VARIANT: Record<string, "default" | "secondary" | "destructiv
   DELETE: "destructive",
 };
 
+/** Map camelCase DB field names to human-readable Chinese labels */
+const FIELD_LABELS: Record<string, string> = {
+  // Client
+  name: "姓名",
+  nameAlt: "別名",
+  idn: "身分證號",
+  sex: "性別",
+  birthday: "生日",
+  isDead: "已歿",
+  householdAdmin: "戶長",
+  incomeStatus: "收入狀況",
+  disabledStatus: "身心障礙",
+  indigenousGroup: "族別",
+  tribe: "部落",
+  plainMountain: "平原/山原",
+  canCall: "電話可否",
+  phone: "電話",
+  phoneNote: "電話備註",
+  phoneAlt: "電話（備用）",
+  phoneAltNote: "電話（備用）備註",
+  mobile: "手機",
+  mobileNote: "手機備註",
+  mobileAlt: "手機（備用）",
+  mobileAltNote: "手機（備用）備註",
+  canMail: "郵寄可否",
+  city: "縣市",
+  cityAlt: "縣市（備用）",
+  dist: "區域",
+  distAlt: "區域（備用）",
+  vill: "里",
+  villAlt: "里（備用）",
+  addr: "地址",
+  addrAlt: "地址（備用）",
+  addrNote: "地址備註",
+  addrAltNote: "地址（備用）備註",
+  note: "備註",
+  照片: "照片",
+  // Case
+  status: "狀態",
+  personInChargeLegacy: "承辦人（舊）",
+  staffInCharge: "承辦人",
+  typesMajor: "主類型",
+  typesMinor: "次類型",
+  relation1: "關係人1",
+  relation2: "關係人2",
+  relation3: "關係人3",
+  contact1: "聯絡人1",
+  contact2: "聯絡人2",
+  contact3: "聯絡人3",
+  handle: "處遇方式",
+  clientId: "族人",
+  // Contact
+  date: "日期",
+  contactType: "通聯方式",
+  isSuccess: "是否成功",
+  record: "紀錄內容",
+  caseId: "案件",
+};
+
+function fieldLabel(field: string): string {
+  return FIELD_LABELS[field] ?? field;
+}
+
 function formatTimestamp(date: Date): string {
   return date.toLocaleString("zh-TW", {
     year: "numeric",
@@ -64,12 +127,12 @@ export default async function HistoryViewer({
                   </span>
                   {isUpdate && entry.changedFields.length > 0 && (
                     <span className="text-xs text-muted-foreground">
-                      {entry.changedFields.join(", ")}
+                      {entry.changedFields.map(fieldLabel).join(", ")}
                     </span>
                   )}
                 </summary>
 
-                {isUpdate && oldData && newData && entry.changedFields.length > 0 && (
+                {isUpdate && entry.changedFields.length > 0 && (oldData || newData) && (
                   <div className="px-4 pb-4">
                     <table className="w-full text-sm border-collapse">
                       <thead>
@@ -83,13 +146,13 @@ export default async function HistoryViewer({
                         {entry.changedFields.map((field: string) => (
                           <tr key={field} className="border-b border-border last:border-b-0">
                             <td className="py-1.5 pr-4 font-medium text-foreground">
-                              {field}
+                              {fieldLabel(field)}
                             </td>
                             <td className="py-1.5 pr-4 text-destructive break-all">
-                              {formatValue(oldData[field])}
+                              {formatValue(oldData?.[field])}
                             </td>
                             <td className="py-1.5 text-primary break-all">
-                              {formatValue(newData[field])}
+                              {formatValue(newData?.[field])}
                             </td>
                           </tr>
                         ))}

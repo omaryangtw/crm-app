@@ -32,9 +32,11 @@ import { DetailLayout } from "@/app/_components/detail-layout";
 import { CardStack } from "@/app/_components/card-stack";
 import { InfoGrid } from "@/app/_components/info-grid";
 import { SectionCard } from "@/app/_components/section-card";
+import { User } from "lucide-react";
 import { DeleteClientButton } from "./delete-client-button";
 import { FamilySection } from "./_components/family-section";
 import { ContactsSection } from "./_components/contacts-section";
+import { PhotoVersionSwitcher } from "./_components/photo-version-switcher";
 import HistoryViewer from "@/app/_components/history-viewer";
 import ClientDetailTabs from "./_components/client-detail-tabs";
 
@@ -65,6 +67,7 @@ export default async function ClientDetailPage({ params }: Props) {
       },
       familyRelationsAsA: { include: { personB: true } },
       familyRelationsAsB: { include: { personA: true } },
+      photos: { orderBy: { version: "desc" } },
     },
   });
 
@@ -112,15 +115,16 @@ export default async function ClientDetailPage({ params }: Props) {
       {/* Two-column layout: left = photo + basic info, right = contact cards */}
       <DetailLayout className="mb-8" sidebar={
         <div className="space-y-4">
-          {/* Photo placeholder */}
-          <div className="bg-muted rounded-lg p-4 flex items-center justify-center min-h-[200px]">
-            <div className="text-center text-muted-foreground">
-              <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
-              </svg>
-              <p className="mt-1 text-sm">照片</p>
+          {/* Photo section */}
+          {client.photos.length > 0 ? (
+            <PhotoVersionSwitcher photos={client.photos} clientName={client.name ?? "(未命名)"} />
+          ) : (
+            <div className="flex items-center justify-center">
+              <div className="bg-muted rounded-full flex items-center justify-center" style={{ width: 96, height: 96 }}>
+                <User className="h-12 w-12 text-muted-foreground" />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Basic info card */}
           <Card>

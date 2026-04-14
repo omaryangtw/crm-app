@@ -15,7 +15,10 @@ export default async function EditClientPage({ params }: Props) {
   const clientId = Number(id);
   if (Number.isNaN(clientId)) notFound();
 
-  const client = await prisma.client.findUnique({ where: { id: clientId } });
+  const client = await prisma.client.findUnique({
+    where: { id: clientId },
+    include: { photos: { orderBy: { version: "desc" } } },
+  });
   if (!client) notFound();
 
   // Convert Date to ISO string for the HTML date input
@@ -34,7 +37,7 @@ export default async function EditClientPage({ params }: Props) {
         ]}
       />
       <PageHeader title={`編輯族人 — ${client.name}`} />
-      <EditClientForm clientId={clientId} defaultValues={defaultValues} />
+      <EditClientForm clientId={clientId} defaultValues={defaultValues} photos={client.photos} />
     </PageContainer>
   );
 }

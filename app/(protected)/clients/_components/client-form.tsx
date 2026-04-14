@@ -16,6 +16,7 @@ import {
   clientCreateSchema,
 } from "@/app/_lib/schemas/client-schema";
 import { FormGrid } from "@/app/_components/form-grid";
+import { PhotoUploadZone } from "@/app/_components/photo-upload-zone";
 import { useFormDraft } from "@/app/_hooks/use-form-draft";
 import { DraftPrompt } from "@/app/_components/draft-prompt";
 import type { z } from "zod";
@@ -36,6 +37,10 @@ interface ClientFormProps {
   submitLabel: string;
   /** Enable draft auto-save (only for create mode) */
   enableDraft?: boolean;
+  /** Client ID — present in edit mode, absent in create mode */
+  clientId?: number;
+  /** Existing photos sorted by version desc (edit mode only) */
+  photos?: Array<{ id: number; photoPath: string; originalPhotoPath: string; version: number }>;
 }
 
 const selectClass =
@@ -87,7 +92,7 @@ function CheckboxField({
   );
 }
 
-export default function ClientForm({ defaultValues, onSubmitAction, submitLabel, enableDraft }: ClientFormProps) {
+export default function ClientForm({ defaultValues, onSubmitAction, submitLabel, enableDraft, clientId, photos }: ClientFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const draft = useFormDraft("draft:client", enableDraft ?? false);
@@ -175,6 +180,18 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel,
           }}
           onDiscard={() => draft.clearDraft()}
         />
+      )}
+
+      {/* 照片上傳（僅編輯模式） */}
+      {clientId != null && (
+        <Card>
+          <CardHeader>
+            <CardTitle>族人照片</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PhotoUploadZone clientId={clientId} photos={photos ?? []} />
+          </CardContent>
+        </Card>
       )}
 
       {/* 基本資料 */}
