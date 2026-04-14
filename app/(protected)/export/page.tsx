@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Papa from "papaparse";
+import { X } from "lucide-react";
 import { exportClients } from "@/app/_lib/actions/export-actions";
 import { EXPORT_PRESETS } from "@/app/_lib/utils/export-utils";
 import type { ExportCriteria, ExportQuery } from "@/app/_lib/schemas/export-schema";
 import { Button } from "@/components/ui/button";
 import { FormGrid } from "@/app/_components/form-grid";
+import { useExportPresets } from "@/app/_hooks/use-export-presets";
+import { safeGetItem, safeSetItem } from "@/app/_lib/utils/storage";
 
 const CLIENT_COLUMNS = [
   { key: "name", label: "姓名" },
@@ -54,11 +57,47 @@ const GROUP_OPTIONS = [
   { value: "yami", label: "雅美" },
 ];
 
+// Read last-used state from localStorage (runs once at module init for SSR safety)
+function readLastUsed(): { query: ExportQuery; columns: Record<string, boolean> } {
+  const saved = safeGetItem<{ query: ExportQuery; columns: Record<string, boolean> }>("export-last-used");
+  if (saved && typeof saved === "object" && "query" in saved && "columns" in saved) {
+    return { query: saved.query ?? {}, columns: saved.columns ?? {} };
+  }
+  return { query: {}, columns: {} };
+}
+
 export default function ExportPage() {
+  // Start with empty state to match SSR — read localStorage after mount
   const [query, setQuery] = useState<ExportQuery>({});
   const [selectedColumns, setSelectedColumns] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Restore last-used state from localStorage after client mount
+  useEffect(() => {
+    const saved = readLastUsed();
+    if (Object.keys(saved.query).length > 0) setQuery(saved.query);
+    if (Object.keys(saved.columns).length > 0) setSelectedColumns(saved.columns);
+  }, []);
+
+  // Task 6.1: Integrate useExportPresets hook
+  const { presets, savePreset, deletePreset, loadPreset } = useExportPresets();
+
+  // Task 6.3: Debounced persist of last-used state (1000ms)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const persistLastUsed = useCallback((q: ExportQuery, cols: Record<string, boolean>) => {
+    safeSetItem("export-last-used", { query: q, columns: cols });
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      persistLastUsed(query, selectedColumns);
+    }, 1000);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query, selectedColumns, persistLastUsed]);
 
   function toggleColumn(key: string) {
     setSelectedColumns((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -133,6 +172,30 @@ export default function ExportPage() {
     }
   }
 
+  // Task 6.1: Load a custom preset into query + columns state
+  function handleLoadCustomPreset(name: string) {
+    const result = loadPreset(name);
+    if (!result) return;
+    setQuery(result.query);
+    setSelectedColumns(result.columns);
+    // Task 6.3: Sync last-used state immediately when loading a preset
+    persistLastUsed(result.query, result.columns);
+  }
+
+  // Task 6.2: Save current state as a custom preset
+  function handleSaveAsPreset() {
+    const name = prompt("請輸入預設名稱");
+    if (name === null) return; // user cancelled
+    if (name.trim() === "") {
+      alert("請輸入預設名稱");
+      return;
+    }
+    if (presets.some((p) => p.name === name)) {
+      if (!confirm("已存在同名預設，是否覆蓋？")) return;
+    }
+    savePreset(name, query, selectedColumns);
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <h1 className="text-xl font-semibold mb-4">資料匯出</h1>
@@ -147,6 +210,7 @@ export default function ExportPage() {
       <div className="mb-6">
         <h2 className="text-sm font-medium text-foreground mb-2">快速匯出</h2>
         <div className="flex flex-wrap gap-2">
+          {/* Built-in presets — no delete icon */}
           <Button
             onClick={() => handlePreset("householdMailing")}
             disabled={loading}
@@ -167,7 +231,39 @@ export default function ExportPage() {
           >
             匯入Google通訊錄
           </Button>
+
+          {/* Task 6.1: Custom preset buttons with delete icon */}
+          {presets.map((preset) => (
+            <span key={preset.name} className="inline-flex items-center gap-1">
+              <Button
+                variant="outline"
+                disabled={loading}
+                onClick={() => handleLoadCustomPreset(preset.name)}
+              >
+                {preset.name}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => deletePreset(preset.name)}
+                aria-label={`刪除預設 ${preset.name}`}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </span>
+          ))}
         </div>
+
+        {/* Task 6.2: Save as preset button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-2"
+          onClick={handleSaveAsPreset}
+        >
+          儲存為預設
+        </Button>
       </div>
 
       {/* Custom export filters */}

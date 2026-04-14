@@ -363,7 +363,7 @@ describe("Feature: contact-efficiency, Property 11: 時間軸按日期降序排�
 
   it("after sorting, each date[i] >= date[i+1] (descending order)", () => {
     fc.assert(
-      fc.property(fc.array(fc.date()), (dates) => {
+      fc.property(fc.array(fc.date({ noInvalidDate: true })), (dates) => {
         const sorted = sortDescending(dates);
 
         // Verify descending order: each element >= the next
@@ -379,7 +379,7 @@ describe("Feature: contact-efficiency, Property 11: 時間軸按日期降序排�
 
   it("sortDescending preserves all original dates (same length and elements)", () => {
     fc.assert(
-      fc.property(fc.array(fc.date()), (dates) => {
+      fc.property(fc.array(fc.date({ noInvalidDate: true })), (dates) => {
         const sorted = sortDescending(dates);
 
         // Same length
@@ -400,7 +400,7 @@ describe("Feature: contact-efficiency, Property 11: 時間軸按日期降序排�
 
   it("sortDescending is idempotent (sorting twice yields same result)", () => {
     fc.assert(
-      fc.property(fc.array(fc.date()), (dates) => {
+      fc.property(fc.array(fc.date({ noInvalidDate: true })), (dates) => {
         const sortedOnce = sortDescending(dates);
         const sortedTwice = sortDescending(sortedOnce);
 

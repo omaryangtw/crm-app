@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,6 +16,8 @@ import {
   clientCreateSchema,
 } from "@/app/_lib/schemas/client-schema";
 import { FormGrid } from "@/app/_components/form-grid";
+import { useFormDraft } from "@/app/_hooks/use-form-draft";
+import { DraftPrompt } from "@/app/_components/draft-prompt";
 import type { z } from "zod";
 
 type ClientFormValues = z.input<typeof clientCreateSchema>;
@@ -32,6 +34,8 @@ interface ClientFormProps {
   defaultValues?: Record<string, any>;
   onSubmitAction: (formData: FormData) => Promise<{ success: boolean; error?: string; data?: { id: number } }>;
   submitLabel: string;
+  /** Enable draft auto-save (only for create mode) */
+  enableDraft?: boolean;
 }
 
 const selectClass =
@@ -83,13 +87,17 @@ function CheckboxField({
   );
 }
 
-export default function ClientForm({ defaultValues, onSubmitAction, submitLabel }: ClientFormProps) {
+export default function ClientForm({ defaultValues, onSubmitAction, submitLabel, enableDraft }: ClientFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const draft = useFormDraft("draft:client", enableDraft ?? false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     register,
     handleSubmit,
+    watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ClientFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,6 +110,23 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
       ...defaultValues,
     },
   });
+
+  // Debounced auto-save: watch all fields, save draft after 5s of inactivity
+  useEffect(() => {
+    if (!(enableDraft ?? false)) return;
+
+    const subscription = watch((values) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        draft.saveDraft(values as Record<string, unknown>);
+      }, 5000);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [watch, enableDraft, draft.saveDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function onSubmit(data: ClientFormValues) {
     setServerError(null);
@@ -128,6 +153,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
       setServerError(result.error ?? "發生未知錯誤");
       return;
     }
+    draft.clearDraft();
     router.push(`/clients/${result.data?.id}`);
     router.refresh();
   }
@@ -138,6 +164,17 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel 
         <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
           {serverError}
         </div>
+      )}
+
+      {draft.hasDraft && draft.draftTimestamp && (
+        <DraftPrompt
+          savedAt={draft.draftTimestamp}
+          onRestore={() => {
+            const data = draft.restoreDraft();
+            if (data) reset(data as ClientFormValues);
+          }}
+          onDiscard={() => draft.clearDraft()}
+        />
       )}
 
       {/* 基本資料 */}

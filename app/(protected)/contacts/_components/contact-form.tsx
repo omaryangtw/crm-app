@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +19,8 @@ import StaffSelector from "@/app/_components/staff-selector";
 import ClientSelector from "@/app/_components/client-selector";
 import CaseSelector from "@/app/_components/case-selector";
 import { FormGrid } from "@/app/_components/form-grid";
+import { useFormDraft } from "@/app/_hooks/use-form-draft";
+import { DraftPrompt } from "@/app/_components/draft-prompt";
 
 type ContactFormValues = z.input<typeof contactCreateSchema>;
 
@@ -35,6 +37,8 @@ interface ContactFormProps {
   caseId?: number;
   /** 當前登入使用者綁定的 staffId，用於新增時自動預填 */
   sessionStaffId?: number | null;
+  /** Enable draft auto-save (only for create mode) */
+  enableDraft?: boolean;
 }
 
 const selectClass =
@@ -49,6 +53,7 @@ export default function ContactForm({
   clientId,
   caseId,
   sessionStaffId,
+  enableDraft,
 }: ContactFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -56,10 +61,14 @@ export default function ContactForm({
     clientId ?? defaultValues?.clientId
   );
   const formRef = useRef<HTMLFormElement>(null);
+  const draft = useFormDraft("draft:contact", enableDraft ?? false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     register,
     handleSubmit,
+    watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ContactFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -70,6 +79,23 @@ export default function ContactForm({
       ...defaultValues,
     },
   });
+
+  // Debounced auto-save: watch all fields, save draft after 5s of inactivity
+  useEffect(() => {
+    if (!(enableDraft ?? false)) return;
+
+    const subscription = watch((values) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        draft.saveDraft(values as Record<string, unknown>);
+      }, 5000);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [watch, enableDraft, draft.saveDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function onSubmit(data: ContactFormValues) {
     setServerError(null);
@@ -113,6 +139,7 @@ export default function ContactForm({
       setServerError(result.error ?? "發生未知錯誤");
       return;
     }
+    draft.clearDraft();
     // Navigate back to the client detail page if clientId is available
     if (data.clientId) {
       router.push(`/clients/${data.clientId}`);
@@ -135,6 +162,17 @@ export default function ContactForm({
         <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
           {serverError}
         </div>
+      )}
+
+      {draft.hasDraft && draft.draftTimestamp && (
+        <DraftPrompt
+          savedAt={draft.draftTimestamp}
+          onRestore={() => {
+            const data = draft.restoreDraft();
+            if (data) reset(data as ContactFormValues);
+          }}
+          onDiscard={() => draft.clearDraft()}
+        />
       )}
 
       {/* 關聯族人 */}

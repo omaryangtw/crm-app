@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +22,8 @@ import {
 import StaffSelector from "@/app/_components/staff-selector";
 import ClientSelector from "@/app/_components/client-selector";
 import { FormGrid } from "@/app/_components/form-grid";
+import { useFormDraft } from "@/app/_hooks/use-form-draft";
+import { DraftPrompt } from "@/app/_components/draft-prompt";
 
 type CaseFormValues = z.input<typeof caseCreateSchema>;
 
@@ -34,6 +36,8 @@ interface CaseFormProps {
   clientId?: number;
   /** 當前登入使用者綁定的 staffId，用於新增時自動預填 */
   sessionStaffId?: number | null;
+  /** Enable draft auto-save (only for create mode) */
+  enableDraft?: boolean;
 }
 
 const selectClass =
@@ -68,14 +72,18 @@ function SelectField({
   );
 }
 
-export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, clientId, sessionStaffId }: CaseFormProps) {
+export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, clientId, sessionStaffId, enableDraft }: CaseFormProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const draft = useFormDraft("draft:case", enableDraft ?? false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     register,
     handleSubmit,
+    watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<CaseFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,6 +93,23 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
       ...defaultValues,
     },
   });
+
+  // Debounced auto-save: watch all fields, save draft after 5s of inactivity
+  useEffect(() => {
+    if (!(enableDraft ?? false)) return;
+
+    const subscription = watch((values) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        draft.saveDraft(values as Record<string, unknown>);
+      }, 5000);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [watch, enableDraft, draft.saveDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function onSubmit(data: CaseFormValues) {
     setServerError(null);
@@ -117,6 +142,7 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
       setServerError(result.error ?? "發生未知錯誤");
       return;
     }
+    draft.clearDraft();
     router.push(`/cases/${result.data?.id}`);
     router.refresh();
   }
@@ -127,6 +153,17 @@ export default function CaseForm({ defaultValues, onSubmitAction, submitLabel, c
         <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
           {serverError}
         </div>
+      )}
+
+      {draft.hasDraft && draft.draftTimestamp && (
+        <DraftPrompt
+          savedAt={draft.draftTimestamp}
+          onRestore={() => {
+            const data = draft.restoreDraft();
+            if (data) reset(data as CaseFormValues);
+          }}
+          onDiscard={() => draft.clearDraft()}
+        />
       )}
 
       {/* 關聯族人 */}

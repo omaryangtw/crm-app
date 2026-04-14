@@ -26,6 +26,7 @@ export default async function NewContactPage({ searchParams }: Props) {
         clientId={clientId}
         caseId={caseId}
         sessionStaffId={sessionStaffId}
+        enableDraft
       />
     </PageContainer>
   );

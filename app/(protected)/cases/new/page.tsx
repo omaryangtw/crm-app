@@ -24,6 +24,7 @@ export default async function NewCasePage({ searchParams }: Props) {
         submitLabel="新增"
         clientId={clientId}
         sessionStaffId={sessionStaffId}
+        enableDraft
       />
     </PageContainer>
   );

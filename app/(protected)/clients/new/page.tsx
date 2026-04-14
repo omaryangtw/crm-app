@@ -14,6 +14,7 @@ export default function NewClientPage() {
       <ClientForm
         onSubmitAction={createClient}
         submitLabel="新增"
+        enableDraft
       />
     </PageContainer>
   );
