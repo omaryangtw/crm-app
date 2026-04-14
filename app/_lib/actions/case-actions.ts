@@ -8,6 +8,7 @@ import { caseCreateSchema, caseUpdateSchema } from "../schemas/case-schema";
 import { sanitizeObject } from "../utils/sanitize";
 import type { ActionResult } from "./auth-actions";
 import { createAuditLogEntry, serializeEntity } from "../audit/audit-service";
+import { requestDeletion } from "./deletion-actions";
 
 export async function createCase(
   formData: FormData
@@ -163,36 +164,13 @@ export async function deleteCase(
   const session = await auth();
   if (!session) return { success: false, error: "請先登入" };
 
-  // Fetch old record before deletion for audit snapshot
-  const oldRecord = await prisma.case.findUnique({ where: { id } });
+  const result = await requestDeletion({
+    entityType: "Case",
+    entityId: id,
+  });
 
-  try {
-    await prisma.case.delete({ where: { id } });
-    revalidatePath("/cases");
-  } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      if (err.code === "P2025") return { success: false, error: "找不到資料" };
-    }
-    return { success: false, error: "系統錯誤，請稍後再試" };
-  }
-
-  try {
-    const userId = parseInt(session.user?.id ?? "0", 10);
-    const userEmail = session.user?.email ?? "";
-    await createAuditLogEntry({
-      entityType: "Case",
-      entityId: id,
-      action: "DELETE",
-      userId,
-      userEmail,
-      oldData: oldRecord
-        ? serializeEntity(oldRecord as unknown as Record<string, unknown>)
-        : null,
-      newData: null,
-      changedFields: [],
-    });
-  } catch {
-    // Audit failure must not affect CRUD result
+  if (!result.success) {
+    return { success: false, error: result.error };
   }
 
   return { success: true, data: null };

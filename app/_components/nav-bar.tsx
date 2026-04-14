@@ -12,6 +12,7 @@ import {
   Phone,
   FolderOpen,
   UserCog,
+  ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlobalSearchTrigger, GlobalSearchMobileTrigger } from "./global-search-trigger";
@@ -26,7 +27,8 @@ const NAV_LINKS = [
 ] as const;
 
 export function NavBar() {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -63,6 +65,20 @@ export function NavBar() {
                 </Link>
               );
             })}
+            {isAdmin && (
+              <Link
+                href="/admin/deletion-requests"
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5",
+                  pathname.startsWith("/admin/deletion-requests")
+                    ? "bg-muted text-foreground font-semibold"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <ShieldCheck className="size-4" />
+                刪除審核
+              </Link>
+            )}
           </div>
 
           {/* Global search trigger (desktop) */}
@@ -146,6 +162,21 @@ export function NavBar() {
             })}
             {/* Mobile search trigger */}
             <GlobalSearchMobileTrigger onAfterClick={() => setMenuOpen(false)} />
+            {isAdmin && (
+              <Link
+                href="/admin/deletion-requests"
+                className={cn(
+                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname.startsWith("/admin/deletion-requests")
+                    ? "bg-muted text-foreground font-semibold"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+                onClick={() => setMenuOpen(false)}
+              >
+                <ShieldCheck className="size-4" />
+                刪除審核
+              </Link>
+            )}
           </div>
           <div className="border-t border-border px-4 py-3 flex gap-2">
             {status === "authenticated" ? (

@@ -13,6 +13,9 @@ const ACTION_LABELS: Record<string, string> = {
   CREATE: "新增",
   UPDATE: "修改",
   DELETE: "刪除",
+  DELETE_REQUESTED: "申請刪除",
+  DELETE_REJECTED: "駁回刪除",
+  RESTORE: "還原",
 };
 
 const ACTION_BADGE_VARIANT: Record<string, "default" | "secondary" | "destructive"> = {

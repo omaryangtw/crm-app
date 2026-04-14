@@ -21,9 +21,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/app/_components/data-table";
 import { SearchInput } from "@/app/_components/search-input";
-import { ConfirmDialog } from "@/app/_components/confirm-dialog";
+import { DeleteRequestDialog } from "@/app/_components/delete-request-dialog";
 import { SEX_LABELS, PLAIN_MOUNTAIN_LABELS } from "@/app/_lib/constants/enums";
 import { deleteClient } from "@/app/_lib/actions/client-actions";
+import type { CascadeEntityType } from "@/app/_lib/utils/snapshot-builder";
 
 interface ClientRow {
   id: number;
@@ -41,9 +42,9 @@ function ActionsCell({ row }: { row: ClientRow }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, startDelete] = useTransition();
 
-  const handleDelete = () => {
+  const handleDelete = (cascadeSelection: CascadeEntityType[]) => {
     startDelete(async () => {
-      await deleteClient(row.id);
+      await deleteClient(row.id, cascadeSelection);
       setDeleteOpen(false);
       router.refresh();
     });
@@ -77,13 +78,12 @@ function ActionsCell({ row }: { row: ClientRow }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ConfirmDialog
+      <DeleteRequestDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title="確認刪除"
-        description={`確定要刪除「${row.name ?? "此族人"}」嗎？此操作將同時刪除所有相關案件與通聯紀錄，且無法復原。`}
-        confirmLabel="刪除"
-        variant="destructive"
+        entityType="Client"
+        entityId={row.id}
+        entityLabel={row.name ?? "此族人"}
         onConfirm={handleDelete}
         loading={deleting}
       />

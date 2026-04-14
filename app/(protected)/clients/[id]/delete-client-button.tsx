@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { deleteClient } from "@/app/_lib/actions/client-actions";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/app/_components/confirm-dialog";
+import { DeleteRequestDialog } from "@/app/_components/delete-request-dialog";
+import type { CascadeEntityType } from "@/app/_lib/utils/snapshot-builder";
 
 interface Props {
   clientId: number;
@@ -16,9 +17,9 @@ export function DeleteClientButton({ clientId, clientName }: Props) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
-  function handleConfirm() {
+  function handleConfirm(cascadeSelection: CascadeEntityType[]) {
     startTransition(async () => {
-      const result = await deleteClient(clientId);
+      const result = await deleteClient(clientId, cascadeSelection);
       if (result.success) {
         router.push("/clients");
       } else {
@@ -33,13 +34,12 @@ export function DeleteClientButton({ clientId, clientName }: Props) {
       <Button variant="destructive" onClick={() => setOpen(true)} disabled={isPending}>
         {isPending ? "刪除中..." : "刪除"}
       </Button>
-      <ConfirmDialog
+      <DeleteRequestDialog
         open={open}
         onOpenChange={setOpen}
-        title="確認刪除"
-        description={`確定要刪除「${clientName ?? "此族人"}」嗎？此操作將同時刪除所有相關案件與通聯紀錄，且無法復原。`}
-        confirmLabel="刪除"
-        variant="destructive"
+        entityType="Client"
+        entityId={clientId}
+        entityLabel={clientName ?? "此族人"}
         onConfirm={handleConfirm}
         loading={isPending}
       />

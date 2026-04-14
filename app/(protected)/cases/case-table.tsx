@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/app/_components/data-table";
 import { SearchInput } from "@/app/_components/search-input";
-import { ConfirmDialog } from "@/app/_components/confirm-dialog";
+import { DeleteRequestDialog } from "@/app/_components/delete-request-dialog";
 import {
   CASE_STATUS_LABELS,
   CASE_TYPE_MAJOR_LABELS,
@@ -84,13 +84,12 @@ function ActionsCell({ row }: { row: CaseRow }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ConfirmDialog
+      <DeleteRequestDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title="確認刪除"
-        description={`確定要刪除案件「${row.name ?? "此案件"}」嗎？此操作無法復原。`}
-        confirmLabel="刪除"
-        variant="destructive"
+        entityType="Case"
+        entityId={row.id}
+        entityLabel={row.name ?? "此案件"}
         onConfirm={handleDelete}
         loading={deleting}
       />

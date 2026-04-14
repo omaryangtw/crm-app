@@ -1,6 +1,6 @@
 export type EntityType = "Client" | "Case" | "Contact";
 
-export type ActionType = "CREATE" | "UPDATE" | "DELETE";
+export type ActionType = "CREATE" | "UPDATE" | "DELETE" | "DELETE_REQUESTED" | "DELETE_REJECTED" | "RESTORE";
 
 export interface CreateAuditLogParams {
   entityType: EntityType;

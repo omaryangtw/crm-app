@@ -8,6 +8,7 @@ import { contactCreateSchema } from "../schemas/contact-schema";
 import { sanitizeObject } from "../utils/sanitize";
 import type { ActionResult } from "./auth-actions";
 import { createAuditLogEntry, serializeEntity } from "../audit/audit-service";
+import { requestDeletion } from "./deletion-actions";
 
 export async function createContact(
   formData: FormData
@@ -103,47 +104,17 @@ export async function deleteContact(
   const session = await auth();
   if (!session) return { success: false, error: "請先登入" };
 
-  // Fetch old record before deletion for audit snapshot
-  const oldRecord = await prisma.contact.findUnique({ where: { id } });
+  const result = await requestDeletion({
+    entityType: "Contact",
+    entityId: id,
+  });
 
-  try {
-    if (clientId) {
-      // Verify the contact belongs to the specified client before deleting
-      const contact = await prisma.contact.findFirst({
-        where: { id, clientId },
-      });
-      if (!contact) return { success: false, error: "找不到資料" };
-    }
-
-    await prisma.contact.delete({ where: { id } });
-    revalidatePath("/contacts");
-    if (clientId) {
-      revalidatePath(`/clients/${clientId}`);
-    }
-  } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      if (err.code === "P2025") return { success: false, error: "找不到資料" };
-    }
-    return { success: false, error: "系統錯誤，請稍後再試" };
+  if (!result.success) {
+    return { success: false, error: result.error };
   }
 
-  try {
-    const userId = parseInt(session.user?.id ?? "0", 10);
-    const userEmail = session.user?.email ?? "";
-    await createAuditLogEntry({
-      entityType: "Contact",
-      entityId: id,
-      action: "DELETE",
-      userId,
-      userEmail,
-      oldData: oldRecord
-        ? serializeEntity(oldRecord as unknown as Record<string, unknown>)
-        : null,
-      newData: null,
-      changedFields: [],
-    });
-  } catch {
-    // Audit failure must not affect CRUD result
+  if (clientId) {
+    revalidatePath(`/clients/${clientId}`);
   }
 
   return { success: true, data: null };

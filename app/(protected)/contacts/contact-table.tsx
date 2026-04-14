@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/app/_components/data-table";
 import { SearchInput } from "@/app/_components/search-input";
+import { DeleteRequestDialog } from "@/app/_components/delete-request-dialog";
 import { ConfirmDialog } from "@/app/_components/confirm-dialog";
 import { ExpandableText } from "@/app/_components/expandable-text";
 import { CONTACT_TYPE_LABELS } from "@/app/_lib/constants/enums";
@@ -93,13 +94,12 @@ function ActionsCell({ row }: { row: ContactRow }) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ConfirmDialog
+      <DeleteRequestDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title="確認刪除"
-        description="確定要刪除此通聯紀錄嗎？此操作無法復原。"
-        confirmLabel="刪除"
-        variant="destructive"
+        entityType="Contact"
+        entityId={row.id}
+        entityLabel={row.record ?? "此通聯紀錄"}
         onConfirm={handleDelete}
         loading={deleting}
       />

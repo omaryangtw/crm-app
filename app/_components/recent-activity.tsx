@@ -8,6 +8,9 @@ const ACTION_BADGE_MAP: Record<string, { label: string; variant: "default" | "se
   CREATE: { label: "新增", variant: "default" },
   UPDATE: { label: "修改", variant: "secondary" },
   DELETE: { label: "刪除", variant: "destructive" },
+  DELETE_REQUESTED: { label: "申請刪除", variant: "destructive" },
+  DELETE_REJECTED: { label: "駁回刪除", variant: "secondary" },
+  RESTORE: { label: "還原", variant: "default" },
 };
 
 const ENTITY_TYPE_LABEL: Record<string, string> = {

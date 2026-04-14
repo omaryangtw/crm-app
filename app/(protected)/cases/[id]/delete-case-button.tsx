@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { deleteCase } from "@/app/_lib/actions/case-actions";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/app/_components/confirm-dialog";
+import { DeleteRequestDialog } from "@/app/_components/delete-request-dialog";
 
 interface Props {
   caseId: number;
@@ -33,13 +33,12 @@ export function DeleteCaseButton({ caseId, caseName }: Props) {
       <Button variant="destructive" onClick={() => setOpen(true)} disabled={isPending}>
         {isPending ? "刪除中..." : "刪除"}
       </Button>
-      <ConfirmDialog
+      <DeleteRequestDialog
         open={open}
         onOpenChange={setOpen}
-        title="確認刪除"
-        description={`確定要刪除案件「${caseName ?? "此案件"}」嗎？此操作無法復原。`}
-        confirmLabel="刪除"
-        variant="destructive"
+        entityType="Case"
+        entityId={caseId}
+        entityLabel={caseName ?? "此案件"}
         onConfirm={handleConfirm}
         loading={isPending}
       />

@@ -282,3 +282,36 @@ model ClientPhoto {
   @@index([clientId])
   @@map("client_photos")
 }
+
+enum DeletionRequestStatus {
+  pending
+  approved
+  rejected
+  restored
+}
+
+model DeletionRequest {
+  id               Int                    @id @default(autoincrement())
+  entityType       String                 @map("entity_type")
+  entityId         Int                    @map("entity_id")
+  status           DeletionRequestStatus  @default(pending)
+  entitySnapshot   Json                   @map("entity_snapshot")
+  cascadeSelection Json                   @default("[]") @map("cascade_selection")
+
+  requesterId      Int                    @map("requester_id")
+  requesterEmail   String                 @map("requester_email")
+
+  reviewerId       Int?                   @map("reviewer_id")
+  reviewerEmail    String?                @map("reviewer_email")
+  reviewedAt       DateTime?              @map("reviewed_at")
+
+  restoredAt       DateTime?              @map("restored_at")
+  restoredById     Int?                   @map("restored_by_id")
+
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([requesterId])
+  @@map("deletion_requests")
+}
