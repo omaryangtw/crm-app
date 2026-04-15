@@ -4,6 +4,7 @@ import { prisma } from "../db";
 import { auth } from "../auth";
 import { buildExportWhereClause } from "../utils/export-utils";
 import { exportCriteriaSchema } from "../schemas/export-schema";
+import { createAuditLogEntry } from "../audit/audit-service";
 import type { ExportCriteria } from "../schemas/export-schema";
 import type { ActionResult } from "./auth-actions";
 
@@ -28,7 +29,7 @@ export async function exportClients(
 
   // Google Contacts preset
   if (flag === "contacts") {
-    return exportGoogleContacts();
+    return exportGoogleContacts(session);
   }
 
   const where = buildExportWhereClause(query);
@@ -46,6 +47,25 @@ export async function exportClients(
 
   try {
     const clients = await prisma.client.findMany({ where, select });
+
+    const userId = parseInt(session.user.id ?? "0", 10);
+    const userEmail = session.user.email ?? "";
+    await createAuditLogEntry({
+      entityType: "Export",
+      entityId: 0,
+      action: "EXPORT",
+      userId,
+      userEmail,
+      oldData: null,
+      newData: {
+        type: "custom",
+        filters: query,
+        columns: selectedColumns,
+        resultCount: clients.length,
+      },
+      changedFields: [],
+    });
+
     return {
       success: true,
       data: clients as unknown as Record<string, unknown>[],
@@ -58,7 +78,9 @@ export async function exportClients(
 /**
  * Export all living clients with addresses in Google Contacts format.
  */
-async function exportGoogleContacts(): Promise<
+async function exportGoogleContacts(
+  session: { user: { id?: string; email?: string | null } },
+): Promise<
   ActionResult<Record<string, unknown>[]>
 > {
   try {
@@ -101,6 +123,19 @@ async function exportGoogleContacts(): Promise<
         "Home Address": homeAddress,
         Notes: notes,
       };
+    });
+
+    const userId = parseInt(session.user.id ?? "0", 10);
+    const userEmail = session.user.email ?? "";
+    await createAuditLogEntry({
+      entityType: "Export",
+      entityId: 0,
+      action: "EXPORT",
+      userId,
+      userEmail,
+      oldData: null,
+      newData: { type: "googleContacts", resultCount: data.length },
+      changedFields: [],
     });
 
     return {

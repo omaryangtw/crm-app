@@ -14,6 +14,7 @@ import {
   UserCog,
   ShieldCheck,
   HardDrive,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlobalSearchTrigger, GlobalSearchMobileTrigger } from "./global-search-trigger";
@@ -27,6 +28,7 @@ const NAV_LINKS = [
 ] as const;
 
 const ADMIN_LINKS = [
+  { href: "/export", label: "匯出", icon: Download },
   { href: "/staff", label: "員工管理", icon: UserCog },
   { href: "/admin/deletion-requests", label: "刪除審核", icon: ShieldCheck },
   { href: "/admin/backups", label: "備份管理", icon: HardDrive },
