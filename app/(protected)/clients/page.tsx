@@ -4,6 +4,8 @@ import { prisma } from "@/app/_lib/db";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/app/_components/page-container";
 import { PageHeader } from "@/app/_components/page-header";
+import { parseFilters, buildFilterWhere } from "@/app/_lib/filters";
+import { clientFilterConfig } from "@/app/_lib/filters/configs";
 import { ClientTable } from "./client-table";
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -27,7 +29,7 @@ const SEARCH_FIELDS = [
 ] as const;
 
 interface Props {
-  searchParams: Promise<{ q?: string; page?: string; pageSize?: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }
 
 export default async function ClientsPage({ searchParams }: Props) {
@@ -35,13 +37,20 @@ export default async function ClientsPage({ searchParams }: Props) {
   const q = params.q;
   const pageSize = Math.max(1, parseInt(params.pageSize ?? "", 10) || DEFAULT_PAGE_SIZE);
 
-  const where = q
+  const searchWhere = q
     ? {
         OR: SEARCH_FIELDS.map((field) => ({
           [field]: { contains: q, mode: "insensitive" as const },
         })),
       }
     : undefined;
+
+  const activeFilters = parseFilters(params, clientFilterConfig);
+  const filterWhere = buildFilterWhere(activeFilters, clientFilterConfig);
+  const andClauses = [searchWhere, filterWhere].filter(
+    (w) => w && Object.keys(w).length > 0,
+  );
+  const where = andClauses.length > 0 ? { AND: andClauses } : undefined;
 
   const total = await prisma.client.count({ where });
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -72,6 +81,8 @@ export default async function ClientsPage({ searchParams }: Props) {
         clients={clients}
         searchQuery={q}
         pagination={{ page, pageSize, total }}
+        filterConfig={clientFilterConfig}
+        activeFilters={activeFilters}
       />
     </PageContainer>
   );

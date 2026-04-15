@@ -4,6 +4,9 @@ import { prisma } from "@/app/_lib/db";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/app/_components/page-container";
 import { PageHeader } from "@/app/_components/page-header";
+import { parseFilters, buildFilterWhere } from "@/app/_lib/filters";
+import { contactFilterConfig } from "@/app/_lib/filters/configs";
+import { resolveRelationLabels } from "@/app/_lib/filters/relation-loaders";
 import { ContactTable } from "./contact-table";
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -11,7 +14,7 @@ const DEFAULT_PAGE_SIZE = 25;
 const SEARCH_FIELDS = ["record"] as const;
 
 interface Props {
-  searchParams: Promise<{ q?: string; page?: string; pageSize?: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }
 
 export default async function ContactsPage({ searchParams }: Props) {
@@ -19,7 +22,7 @@ export default async function ContactsPage({ searchParams }: Props) {
   const q = params.q;
   const pageSize = Math.max(1, parseInt(params.pageSize ?? "", 10) || DEFAULT_PAGE_SIZE);
 
-  const where = q
+  const searchWhere = q
     ? {
         OR: [
           ...SEARCH_FIELDS.map((field) => ({
@@ -29,6 +32,14 @@ export default async function ContactsPage({ searchParams }: Props) {
         ],
       }
     : undefined;
+
+  const activeFilters = parseFilters(params, contactFilterConfig);
+  const filterWhere = buildFilterWhere(activeFilters, contactFilterConfig);
+  const relationLabels = await resolveRelationLabels(activeFilters, contactFilterConfig);
+  const andClauses = [searchWhere, filterWhere].filter(
+    (w) => w && Object.keys(w).length > 0,
+  );
+  const where = andClauses.length > 0 ? { AND: andClauses } : undefined;
 
   const total = await prisma.contact.count({ where });
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -64,6 +75,9 @@ export default async function ContactsPage({ searchParams }: Props) {
         contacts={contacts}
         searchQuery={q}
         pagination={{ page, pageSize, total }}
+        filterConfig={contactFilterConfig}
+        activeFilters={activeFilters}
+        relationLabels={relationLabels}
       />
     </PageContainer>
   );

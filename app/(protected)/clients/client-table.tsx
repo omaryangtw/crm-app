@@ -28,10 +28,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/app/_components/data-table";
 import { SearchInput } from "@/app/_components/search-input";
+import { FilterBar } from "@/app/_components/filter-bar";
 import { DeleteRequestDialog } from "@/app/_components/delete-request-dialog";
 import { SEX_LABELS, PLAIN_MOUNTAIN_LABELS, INDIGENOUS_GROUP_LABELS } from "@/app/_lib/constants/enums";
 import { deleteClient } from "@/app/_lib/actions/client-actions";
 import type { CascadeEntityType } from "@/app/_lib/utils/snapshot-builder";
+import type { FilterConfig, ActiveFilter } from "@/app/_lib/filters/filter-config";
 
 interface ClientRow {
   id: number;
@@ -221,9 +223,11 @@ interface ClientTableProps {
   clients: ClientRow[];
   searchQuery?: string;
   pagination?: { page: number; pageSize: number; total: number };
+  filterConfig?: FilterConfig;
+  activeFilters?: ActiveFilter[];
 }
 
-export function ClientTable({ clients, searchQuery, pagination }: ClientTableProps) {
+export function ClientTable({ clients, searchQuery, pagination, filterConfig, activeFilters }: ClientTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -251,6 +255,9 @@ export function ClientTable({ clients, searchQuery, pagination }: ClientTablePro
   return (
     <div className="space-y-4">
       <SearchInput placeholder="搜尋族人（姓名、電話、地址…）" />
+      {filterConfig && (
+        <FilterBar config={filterConfig} activeFilters={activeFilters ?? []} />
+      )}
       <DataTable
         table={table}
         columns={columns}

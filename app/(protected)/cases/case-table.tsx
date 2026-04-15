@@ -22,12 +22,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/app/_components/data-table";
 import { SearchInput } from "@/app/_components/search-input";
+import { FilterBar } from "@/app/_components/filter-bar";
 import { DeleteRequestDialog } from "@/app/_components/delete-request-dialog";
 import {
   CASE_STATUS_LABELS,
   CASE_TYPE_MAJOR_LABELS,
 } from "@/app/_lib/constants/enums";
 import { deleteCase } from "@/app/_lib/actions/case-actions";
+import type { FilterConfig, ActiveFilter } from "@/app/_lib/filters/filter-config";
 
 interface CaseRow {
   id: number;
@@ -165,9 +167,12 @@ interface CaseTableProps {
   cases: CaseRow[];
   searchQuery?: string;
   pagination?: { page: number; pageSize: number; total: number };
+  filterConfig?: FilterConfig;
+  activeFilters?: ActiveFilter[];
+  relationLabels?: Record<string, string>;
 }
 
-export function CaseTable({ cases, searchQuery, pagination }: CaseTableProps) {
+export function CaseTable({ cases, searchQuery, pagination, filterConfig, activeFilters, relationLabels }: CaseTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -195,6 +200,9 @@ export function CaseTable({ cases, searchQuery, pagination }: CaseTableProps) {
   return (
     <div className="space-y-4">
       <SearchInput placeholder="搜尋案件（名稱、備註、處理方式…）" />
+      {filterConfig && (
+        <FilterBar config={filterConfig} activeFilters={activeFilters ?? []} relationLabels={relationLabels} />
+      )}
       <DataTable
         table={table}
         columns={columns}

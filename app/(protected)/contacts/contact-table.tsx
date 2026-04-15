@@ -22,12 +22,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/app/_components/data-table";
 import { SearchInput } from "@/app/_components/search-input";
+import { FilterBar } from "@/app/_components/filter-bar";
 import { DeleteRequestDialog } from "@/app/_components/delete-request-dialog";
 import { ConfirmDialog } from "@/app/_components/confirm-dialog";
 import { ExpandableText } from "@/app/_components/expandable-text";
 import { CONTACT_TYPE_LABELS } from "@/app/_lib/constants/enums";
 import { deleteContact } from "@/app/_lib/actions/contact-actions";
 import { markContactUnsuccessful } from "@/app/_lib/actions/contact-actions";
+import type { FilterConfig, ActiveFilter } from "@/app/_lib/filters/filter-config";
 
 interface ContactRow {
   id: number;
@@ -227,9 +229,12 @@ interface ContactTableProps {
   contacts: ContactRow[];
   searchQuery?: string;
   pagination?: { page: number; pageSize: number; total: number };
+  filterConfig?: FilterConfig;
+  activeFilters?: ActiveFilter[];
+  relationLabels?: Record<string, string>;
 }
 
-export function ContactTable({ contacts, searchQuery, pagination }: ContactTableProps) {
+export function ContactTable({ contacts, searchQuery, pagination, filterConfig, activeFilters, relationLabels }: ContactTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
@@ -257,6 +262,9 @@ export function ContactTable({ contacts, searchQuery, pagination }: ContactTable
   return (
     <div className="space-y-4">
       <SearchInput placeholder="搜尋通聯紀錄…" />
+      {filterConfig && (
+        <FilterBar config={filterConfig} activeFilters={activeFilters ?? []} relationLabels={relationLabels} />
+      )}
       <DataTable
         table={table}
         columns={columns}
