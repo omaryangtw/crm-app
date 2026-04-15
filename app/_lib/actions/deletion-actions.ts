@@ -163,11 +163,15 @@ export async function getDeletionRequests(params: {
     prisma.deletionRequest.count({ where }),
   ]);
 
-  // Resolve entity labels
+  // Resolve entity labels — use DB first, fall back to entitySnapshot if entity was deleted
   const requestsWithLabels: DeletionRequestWithLabel[] = await Promise.all(
     requests.map(async (req) => ({
       ...req,
-      entityLabel: await resolveEntityLabel(req.entityType as EntityType, req.entityId),
+      entityLabel: await resolveEntityLabel(
+        req.entityType as EntityType,
+        req.entityId,
+        req.entitySnapshot as Record<string, unknown> | null
+      ),
     }))
   );
 
@@ -176,8 +180,28 @@ export async function getDeletionRequests(params: {
 
 async function resolveEntityLabel(
   entityType: EntityType,
-  entityId: number
+  entityId: number,
+  entitySnapshot?: Record<string, unknown> | null
 ): Promise<string> {
+  // Helper: extract name from entitySnapshot.entity
+  function labelFromSnapshot(): string | null {
+    const entity = entitySnapshot?.entity as Record<string, unknown> | undefined;
+    if (!entity) return null;
+    if (entityType === "Client" || entityType === "Case") {
+      const name = entity.name;
+      if (typeof name === "string" && name) return name;
+    }
+    if (entityType === "Contact") {
+      const date = entity.date;
+      const contactType = entity.contactType;
+      const datePart = typeof date === "string" ? date.slice(0, 10) : "無日期";
+      const typePart = typeof contactType === "string" ? contactType : "";
+      const label = `${datePart} ${typePart}`.trim();
+      return label || null;
+    }
+    return null;
+  }
+
   try {
     switch (entityType) {
       case "Client": {
@@ -185,32 +209,34 @@ async function resolveEntityLabel(
           where: { id: entityId },
           select: { name: true },
         });
-        return client?.name ?? `Client #${entityId}`;
+        return client?.name ?? labelFromSnapshot() ?? `Client #${entityId}`;
       }
       case "Case": {
         const caseRecord = await prisma.case.findUnique({
           where: { id: entityId },
           select: { name: true },
         });
-        return caseRecord?.name ?? `Case #${entityId}`;
+        return caseRecord?.name ?? labelFromSnapshot() ?? `Case #${entityId}`;
       }
       case "Contact": {
         const contact = await prisma.contact.findUnique({
           where: { id: entityId },
           select: { date: true, contactType: true, record: true },
         });
-        if (!contact) return `Contact #${entityId}`;
-        const datePart = contact.date
-          ? contact.date.toISOString().slice(0, 10)
-          : "無日期";
-        const typePart = contact.contactType ?? "";
-        return `${datePart} ${typePart}`.trim() || `Contact #${entityId}`;
+        if (contact) {
+          const datePart = contact.date
+            ? contact.date.toISOString().slice(0, 10)
+            : "無日期";
+          const typePart = contact.contactType ?? "";
+          return `${datePart} ${typePart}`.trim() || `Contact #${entityId}`;
+        }
+        return labelFromSnapshot() ?? `Contact #${entityId}`;
       }
       default:
-        return `${entityType} #${entityId}`;
+        return labelFromSnapshot() ?? `${entityType} #${entityId}`;
     }
   } catch {
-    return `${entityType} #${entityId}`;
+    return labelFromSnapshot() ?? `${entityType} #${entityId}`;
   }
 }
 
