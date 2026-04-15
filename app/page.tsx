@@ -47,9 +47,13 @@ export default async function Home() {
     ? await getPersonalStats(sessionStaffId)
     : null;
 
-  const recentActivity = userId
-    ? await getRecentActivity(userId)
-    : [];
+  const [myActivity, allActivity] = await Promise.all([
+    userId ? getRecentActivity(userId) : Promise.resolve([]),
+    getRecentActivity(null),
+  ]);
+
+  const serializedMyActivity = myActivity.map((a) => ({ ...a, createdAt: a.createdAt.toISOString() }));
+  const serializedAllActivity = allActivity.map((a) => ({ ...a, createdAt: a.createdAt.toISOString() }));
 
   const serialized = todos.map((t) => ({
     id: t.id,
@@ -94,10 +98,10 @@ export default async function Home() {
       {personalStats && <div className="mb-8"><PersonalStats stats={personalStats} /></div>}
 
       <div className="mb-8">
-        <RecentActivity items={recentActivity} />
+        <TodoDashboard todos={serialized} sessionStaffId={sessionStaffId} />
       </div>
 
-      <TodoDashboard todos={serialized} sessionStaffId={sessionStaffId} />
+      <RecentActivity myItems={serializedMyActivity} allItems={serializedAllActivity} hasUser={!!userId} />
     </PageContainer>
   );
 }

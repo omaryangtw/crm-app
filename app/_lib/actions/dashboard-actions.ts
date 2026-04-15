@@ -71,12 +71,12 @@ export async function getPersonalStats(
 // ---------------------------------------------------------------------------
 
 export async function getRecentActivity(
-  userId: number,
+  userId: number | null,
 ): Promise<RecentActivityItem[]> {
   const entries = await prisma.auditLog.findMany({
-    where: { userId },
+    where: userId ? { userId } : {},
     orderBy: { createdAt: "desc" },
-    take: 10,
+    take: 20,
     select: {
       id: true,
       action: true,

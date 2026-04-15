@@ -1,8 +1,21 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/app/_components/section-card";
 import { formatRelativeTime, buildEntityHref } from "@/app/_lib/utils/search-utils";
-import type { RecentActivityItem } from "@/app/_lib/actions/dashboard-actions";
+
+interface ActivityItem {
+  id: number;
+  action: string;
+  entityType: string;
+  entityId: number;
+  entityName: string;
+  clientName?: string | null;
+  createdAt: string;
+}
 
 const ACTION_BADGE_MAP: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
   CREATE: { label: "新增", variant: "default" },
@@ -20,12 +33,38 @@ const ENTITY_TYPE_LABEL: Record<string, string> = {
 };
 
 interface RecentActivityProps {
-  items: RecentActivityItem[];
+  myItems: ActivityItem[];
+  allItems: ActivityItem[];
+  hasUser: boolean;
 }
 
-export function RecentActivity({ items }: RecentActivityProps) {
+export function RecentActivity({ myItems, allItems, hasUser }: RecentActivityProps) {
+  const [mode, setMode] = useState<"mine" | "all">(hasUser ? "mine" : "all");
+  const items = mode === "mine" ? myItems : allItems;
+
   return (
-    <SectionCard title="最近操作">
+    <SectionCard
+      title="最近操作"
+      action={
+        <div className="flex items-center gap-2">
+          <Button
+            variant={mode === "mine" ? "default" : "outline"}
+            size="sm"
+            disabled={!hasUser}
+            onClick={() => setMode("mine")}
+          >
+            我的操作
+          </Button>
+          <Button
+            variant={mode === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setMode("all")}
+          >
+            全部操作
+          </Button>
+        </div>
+      }
+    >
       {items.length === 0 ? (
         <p className="text-sm text-muted-foreground">尚無操作紀錄</p>
       ) : (
