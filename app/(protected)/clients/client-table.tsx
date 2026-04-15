@@ -12,6 +12,13 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontal, Users, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +29,7 @@ import {
 import { DataTable } from "@/app/_components/data-table";
 import { SearchInput } from "@/app/_components/search-input";
 import { DeleteRequestDialog } from "@/app/_components/delete-request-dialog";
-import { SEX_LABELS, PLAIN_MOUNTAIN_LABELS } from "@/app/_lib/constants/enums";
+import { SEX_LABELS, PLAIN_MOUNTAIN_LABELS, INDIGENOUS_GROUP_LABELS } from "@/app/_lib/constants/enums";
 import { deleteClient } from "@/app/_lib/actions/client-actions";
 import type { CascadeEntityType } from "@/app/_lib/utils/snapshot-builder";
 
@@ -31,10 +38,19 @@ interface ClientRow {
   name: string | null;
   sex: string | null;
   phone: string | null;
+  phoneAlt: string | null;
   mobile: string | null;
+  mobileAlt: string | null;
+  city: string | null;
   dist: string | null;
+  vill: string | null;
   addr: string | null;
+  cityAlt: string | null;
+  distAlt: string | null;
+  villAlt: string | null;
+  addrAlt: string | null;
   plainMountain: string | null;
+  indigenousGroup: string | null;
 }
 
 function ActionsCell({ row }: { row: ClientRow }) {
@@ -91,6 +107,11 @@ function ActionsCell({ row }: { row: ClientRow }) {
   );
 }
 
+/** Combine address parts into a single display string */
+function formatAddress(city: string | null, dist: string | null, vill: string | null, addr: string | null): string {
+  return [city, dist, vill, addr].filter(Boolean).join("") || "—";
+}
+
 const columns: ColumnDef<ClientRow>[] = [
   {
     accessorKey: "name",
@@ -116,21 +137,73 @@ const columns: ColumnDef<ClientRow>[] = [
     id: "phone",
     header: "電話",
     accessorFn: (row) => row.phone || row.mobile || null,
-    cell: ({ row }) => row.original.phone || row.original.mobile || "—",
+    cell: ({ row }) => {
+      const r = row.original;
+      const primary = r.phone || r.mobile || null;
+      if (!primary) return "—";
+
+      const altParts = [r.phoneAlt, r.mobileAlt].filter(Boolean);
+      if (altParts.length === 0) return primary;
+
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="inline-flex items-center gap-1 cursor-default">
+              {primary}
+              <Badge variant="outline" className="text-[10px] px-1 py-0">+{altParts.length}</Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="space-y-0.5">
+                <div className="font-medium">備用電話</div>
+                {altParts.map((p, i) => <div key={i}>{p}</div>)}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
   },
   {
-    accessorKey: "dist",
-    header: "區域",
-    cell: ({ getValue }) => getValue<string | null>() ?? "—",
-  },
-  {
-    accessorKey: "addr",
+    id: "address",
     header: "地址",
-    cell: ({ getValue }) => getValue<string | null>() ?? "—",
+    accessorFn: (row) => [row.city, row.dist, row.vill, row.addr].filter(Boolean).join(""),
+    cell: ({ row }) => {
+      const r = row.original;
+      const primary = formatAddress(r.city, r.dist, r.vill, r.addr);
+      const altAddr = formatAddress(r.cityAlt, r.distAlt, r.villAlt, r.addrAlt);
+      const hasAlt = altAddr !== "—";
+
+      if (!hasAlt) return primary;
+
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="inline-flex items-center gap-1 cursor-default">
+              {primary}
+              <Badge variant="outline" className="text-[10px] px-1 py-0">備</Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="space-y-0.5">
+                <div className="font-medium">備用地址</div>
+                <div>{altAddr}</div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
+  },
+  {
+    accessorKey: "indigenousGroup",
+    header: "族別",
+    cell: ({ getValue }) => {
+      const v = getValue<string | null>();
+      return v ? (INDIGENOUS_GROUP_LABELS[v] ?? v) : "—";
+    },
   },
   {
     accessorKey: "plainMountain",
-    header: "平原/山原",
+    header: "平/山",
     cell: ({ getValue }) => {
       const v = getValue<string | null>();
       return v ? (PLAIN_MOUNTAIN_LABELS[v] ?? v) : "—";

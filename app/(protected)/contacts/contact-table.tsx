@@ -144,6 +144,24 @@ const columns: ColumnDef<ContactRow>[] = [
     },
   },
   {
+    id: "clientName",
+    header: "族人",
+    accessorFn: (row) => row.client?.name ?? null,
+    cell: ({ row }) => {
+      const client = row.original.client;
+      return client ? (
+        <Link
+          href={`/clients/${client.id}`}
+          className="text-primary hover:underline"
+        >
+          {client.name ?? "—"}
+        </Link>
+      ) : (
+        "—"
+      );
+    },
+  },
+  {
     accessorKey: "contactType",
     header: "類型",
     cell: ({ getValue }) => {
@@ -157,22 +175,12 @@ const columns: ColumnDef<ContactRow>[] = [
   {
     accessorKey: "isSuccess",
     header: "成功",
-    cell: ({ getValue }) => (getValue<boolean>() ? "✓" : "✗"),
-  },
-  {
-    accessorKey: "record",
-    header: "紀錄",
     cell: ({ getValue }) => {
-      const v = getValue<string | null>();
-      if (!v) return "—";
-      return <ExpandableText text={v} />;
+      const v = getValue<boolean>();
+      return v
+        ? <Badge variant="default">成功</Badge>
+        : <Badge variant="destructive">失敗</Badge>;
     },
-  },
-  {
-    id: "staffInCharge",
-    header: "承辦人",
-    accessorFn: (row) => row.staffInCharge.map((s) => s.name).join(", ") || null,
-    cell: ({ getValue }) => getValue<string | null>() ?? "—",
   },
   {
     id: "caseName",
@@ -193,22 +201,19 @@ const columns: ColumnDef<ContactRow>[] = [
     },
   },
   {
-    id: "clientName",
-    header: "族人",
-    accessorFn: (row) => row.client?.name ?? null,
-    cell: ({ row }) => {
-      const client = row.original.client;
-      return client ? (
-        <Link
-          href={`/clients/${client.id}`}
-          className="text-primary hover:underline"
-        >
-          {client.name ?? "—"}
-        </Link>
-      ) : (
-        "—"
-      );
+    accessorKey: "record",
+    header: "紀錄",
+    cell: ({ getValue }) => {
+      const v = getValue<string | null>();
+      if (!v) return "—";
+      return <ExpandableText text={v} />;
     },
+  },
+  {
+    id: "staffInCharge",
+    header: "承辦人",
+    accessorFn: (row) => row.staffInCharge.map((s) => s.name).join(", ") || null,
+    cell: ({ getValue }) => getValue<string | null>() ?? "—",
   },
   {
     id: "actions",
