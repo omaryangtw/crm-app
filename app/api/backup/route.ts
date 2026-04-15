@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/app/_lib/auth";
-import { prisma } from "@/app/_lib/db";
-import { runBackup } from "@/app/_lib/utils/backup";
+import { runBackup, listBackups, cleanupOldBackups } from "@/app/_lib/utils/backup";
 
 export async function GET() {
   const session = await auth();
@@ -9,14 +8,16 @@ export async function GET() {
     return NextResponse.json({ error: "權限不足" }, { status: 403 });
   }
 
-  const familyRelations = await prisma.familyRelation.findMany({
-    include: {
-      personA: { select: { id: true, name: true } },
-      personB: { select: { id: true, name: true } },
-    },
-  });
-
-  return NextResponse.json(familyRelations);
+  try {
+    const backups = await listBackups();
+    return NextResponse.json(backups);
+  } catch (error) {
+    console.error("[Backup] Failed to list backups:", error);
+    return NextResponse.json(
+      { error: "無法取得備份清單" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST() {
@@ -26,8 +27,20 @@ export async function POST() {
   }
 
   try {
-    await runBackup();
-    return NextResponse.json({ success: true, message: "備份完成" });
+    const backupResult = await runBackup();
+
+    // Run cleanup after backup completes
+    await cleanupOldBackups();
+
+    // Partial failure → HTTP 207
+    if (backupResult.metadata.status === "partial") {
+      return NextResponse.json(
+        { success: true, ...backupResult },
+        { status: 207 }
+      );
+    }
+
+    return NextResponse.json({ success: true, ...backupResult });
   } catch (error) {
     console.error("[Backup] Manual backup failed:", error);
     return NextResponse.json(

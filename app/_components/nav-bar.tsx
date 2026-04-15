@@ -13,6 +13,7 @@ import {
   FolderOpen,
   UserCog,
   ShieldCheck,
+  HardDrive,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlobalSearchTrigger, GlobalSearchMobileTrigger } from "./global-search-trigger";
@@ -77,6 +78,20 @@ export function NavBar() {
               >
                 <ShieldCheck className="size-4" />
                 刪除審核
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                href="/admin/backups"
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5",
+                  pathname.startsWith("/admin/backups")
+                    ? "bg-muted text-foreground font-semibold"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <HardDrive className="size-4" />
+                備份管理
               </Link>
             )}
           </div>
@@ -175,6 +190,21 @@ export function NavBar() {
               >
                 <ShieldCheck className="size-4" />
                 刪除審核
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                href="/admin/backups"
+                className={cn(
+                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname.startsWith("/admin/backups")
+                    ? "bg-muted text-foreground font-semibold"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+                onClick={() => setMenuOpen(false)}
+              >
+                <HardDrive className="size-4" />
+                備份管理
               </Link>
             )}
           </div>

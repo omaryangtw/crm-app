@@ -275,30 +275,42 @@ describe("Integration: Backup file structure", () => {
   const mockFamilyRelations = [
     { id: 1, personAId: 1, personBId: 2, relationAToB: "兄", relationBToA: "弟" },
   ];
+  const mockUsers = [
+    { id: 1, email: "admin@test.com", role: "admin", staffId: null, createdAt: new Date(), updatedAt: new Date() },
+  ];
+
+  /** Helper: build a full prisma mock with all 13 tables */
+  function buildPrismaMock(overrides: Record<string, unknown> = {}) {
+    return {
+      user: { findMany: vi.fn().mockResolvedValue(overrides.users ?? mockUsers) },
+      staff: { findMany: vi.fn().mockResolvedValue(overrides.staff ?? []) },
+      client: { findMany: vi.fn().mockResolvedValue(overrides.clients ?? mockClients) },
+      case: { findMany: vi.fn().mockResolvedValue(overrides.cases ?? mockCases) },
+      contact: { findMany: vi.fn().mockResolvedValue(overrides.contacts ?? mockContacts) },
+      todo: { findMany: vi.fn().mockResolvedValue(overrides.todos ?? []) },
+      familyRelation: { findMany: vi.fn().mockResolvedValue(overrides.familyRelations ?? mockFamilyRelations) },
+      deletionRequest: { findMany: vi.fn().mockResolvedValue(overrides.deletionRequests ?? []) },
+      auditLog: { findMany: vi.fn().mockResolvedValue(overrides.auditLogs ?? []) },
+      clientPhoto: { findMany: vi.fn().mockResolvedValue(overrides.clientPhotos ?? []) },
+      $queryRaw: vi.fn().mockResolvedValue(overrides.rawQuery ?? []),
+    };
+  }
 
   beforeEach(() => {
     vi.resetModules();
     vi.resetAllMocks();
   });
 
-  it("creates timestamped directory with 4 JSON files", async () => {
-    // Mock the dependencies
+  it("creates timestamped directory with 13 table JSON files + metadata.json", async () => {
     vi.doMock("fs/promises", () => ({
       mkdir: mockMkdir,
       writeFile: mockWriteFile,
     }));
 
-    vi.doMock("@/app/_lib/db", () => ({
-      prisma: {
-        client: { findMany: vi.fn().mockResolvedValue(mockClients) },
-        case: { findMany: vi.fn().mockResolvedValue(mockCases) },
-        contact: { findMany: vi.fn().mockResolvedValue(mockContacts) },
-        familyRelation: { findMany: vi.fn().mockResolvedValue(mockFamilyRelations) },
-      },
-    }));
+    vi.doMock("@/app/_lib/db", () => ({ prisma: buildPrismaMock() }));
 
     const { runBackup } = await import("@/app/_lib/utils/backup");
-    await runBackup();
+    const result = await runBackup();
 
     // mkdir should be called once with recursive: true
     expect(mockMkdir).toHaveBeenCalledTimes(1);
@@ -306,18 +318,22 @@ describe("Integration: Backup file structure", () => {
     expect(dirPath).toMatch(/backups[\\/]\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}/);
     expect(mockMkdir.mock.calls[0][1]).toEqual({ recursive: true });
 
-    // writeFile should be called 4 times (clients, cases, contacts, family_relations)
-    expect(mockWriteFile).toHaveBeenCalledTimes(4);
+    // writeFile: 13 table JSON files + 1 metadata.json = 14
+    expect(mockWriteFile).toHaveBeenCalledTimes(14);
 
     const writtenFiles = mockWriteFile.mock.calls.map(
       (call) => (call[0] as string).split(/[\\/]/).pop()
     );
-    expect(writtenFiles.sort()).toEqual([
-      "cases.json",
-      "clients.json",
-      "contacts.json",
-      "family_relations.json",
-    ]);
+    expect(writtenFiles).toContain("metadata.json");
+    expect(writtenFiles).toContain("clients.json");
+    expect(writtenFiles).toContain("users.json");
+    expect(writtenFiles).toContain("_CaseToStaff.json");
+
+    // Result should contain snapshotName and metadata
+    expect(result.snapshotName).toMatch(/\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}/);
+    expect(result.metadata.status).toBe("complete");
+    expect(result.metadata.version).toBe(2);
+    expect(result.metadata.tables).toHaveLength(13);
   });
 
   it("writes correct JSON content for each table", async () => {
@@ -326,14 +342,7 @@ describe("Integration: Backup file structure", () => {
       writeFile: mockWriteFile,
     }));
 
-    vi.doMock("@/app/_lib/db", () => ({
-      prisma: {
-        client: { findMany: vi.fn().mockResolvedValue(mockClients) },
-        case: { findMany: vi.fn().mockResolvedValue(mockCases) },
-        contact: { findMany: vi.fn().mockResolvedValue(mockContacts) },
-        familyRelation: { findMany: vi.fn().mockResolvedValue(mockFamilyRelations) },
-      },
-    }));
+    vi.doMock("@/app/_lib/db", () => ({ prisma: buildPrismaMock() }));
 
     const { runBackup } = await import("@/app/_lib/utils/backup");
     await runBackup();
@@ -363,25 +372,24 @@ describe("Integration: Backup file structure", () => {
     expect(relationsJson).toEqual(mockFamilyRelations);
   });
 
-  it("propagates errors when a table query fails", async () => {
+  it("records error in metadata when a table query fails (does not throw)", async () => {
     vi.doMock("fs/promises", () => ({
       mkdir: mockMkdir,
       writeFile: mockWriteFile,
     }));
 
-    vi.doMock("@/app/_lib/db", () => ({
-      prisma: {
-        client: {
-          findMany: vi.fn().mockRejectedValue(new Error("DB connection lost")),
-        },
-        case: { findMany: vi.fn().mockResolvedValue([]) },
-        contact: { findMany: vi.fn().mockResolvedValue([]) },
-        familyRelation: { findMany: vi.fn().mockResolvedValue([]) },
-      },
-    }));
+    const prismaMock = buildPrismaMock();
+    prismaMock.client.findMany = vi.fn().mockRejectedValue(new Error("DB connection lost"));
+    vi.doMock("@/app/_lib/db", () => ({ prisma: prismaMock }));
 
     const { runBackup } = await import("@/app/_lib/utils/backup");
-    await expect(runBackup()).rejects.toThrow("DB connection lost");
+    const result = await runBackup();
+
+    // Should NOT throw — per-table error handling continues
+    expect(result.metadata.status).toBe("partial");
+    expect(result.metadata.errors).toBeDefined();
+    expect(result.metadata.errors!.some((e) => e.table === "clients")).toBe(true);
+    expect(result.metadata.errors![0].error).toContain("DB connection lost");
   });
 
   it("uses BACKUP_DIR env variable for directory path", async () => {
@@ -393,14 +401,7 @@ describe("Integration: Backup file structure", () => {
       writeFile: mockWriteFile,
     }));
 
-    vi.doMock("@/app/_lib/db", () => ({
-      prisma: {
-        client: { findMany: vi.fn().mockResolvedValue([]) },
-        case: { findMany: vi.fn().mockResolvedValue([]) },
-        contact: { findMany: vi.fn().mockResolvedValue([]) },
-        familyRelation: { findMany: vi.fn().mockResolvedValue([]) },
-      },
-    }));
+    vi.doMock("@/app/_lib/db", () => ({ prisma: buildPrismaMock() }));
 
     const { runBackup } = await import("@/app/_lib/utils/backup");
     await runBackup();
