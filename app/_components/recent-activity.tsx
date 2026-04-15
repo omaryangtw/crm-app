@@ -24,12 +24,14 @@ const ACTION_BADGE_MAP: Record<string, { label: string; variant: "default" | "se
   DELETE_REQUESTED: { label: "申請刪除", variant: "destructive" },
   DELETE_REJECTED: { label: "駁回刪除", variant: "secondary" },
   RESTORE: { label: "還原", variant: "default" },
+  EXPORT: { label: "匯出", variant: "secondary" },
 };
 
 const ENTITY_TYPE_LABEL: Record<string, string> = {
   Client: "族人",
   Case: "案件",
   Contact: "通聯紀錄",
+  Export: "資料匯出",
 };
 
 interface RecentActivityProps {

@@ -7,6 +7,8 @@ export function buildEntityHref(entityType: string, entityId: number): string {
       return `/cases/${entityId}`;
     case "Contact":
       return `/contacts/${entityId}`;
+    case "Export":
+      return "/export";
     default:
       return "#";
   }
@@ -57,6 +59,12 @@ export function extractEntityName(
       return (data.name as string) ?? "(未命名案件)";
     case "Contact":
       return (data.record as string)?.slice(0, 30) ?? "(無紀錄)";
+    case "Export": {
+      const type = data.type as string | undefined;
+      const count = data.resultCount as number | undefined;
+      if (type === "googleContacts") return `Google 通訊錄 (${count ?? 0} 筆)`;
+      return `自訂匯出 (${count ?? 0} 筆)`;
+    }
     default:
       return "(未知)";
   }
