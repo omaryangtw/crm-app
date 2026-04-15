@@ -17,6 +17,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: { email: credentials.email as string },
         });
         if (!user) return null;
+
+        // Password reset flow: empty password means admin reset it.
+        // Accept whatever the user types and save it as the new password.
+        if (user.password === "") {
+          const newHash = await bcrypt.hash(credentials.password as string, 10);
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { password: newHash },
+          });
+          return { id: user.id.toString(), email: user.email, role: user.role, staffId: user.staffId };
+        }
+
         const valid = await bcrypt.compare(
           credentials.password as string,
           user.password

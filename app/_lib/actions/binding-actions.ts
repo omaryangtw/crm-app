@@ -175,3 +175,57 @@ export async function autoBindByEmail(): Promise<AutoBindResult> {
   revalidatePath("/staff", "layout");
   return { success: true, bound, skipped };
 }
+
+
+// ── Password Reset (admin only) ──
+
+/**
+ * Reset a user's password. Sets password to empty string sentinel.
+ * On next login, whatever password the user types becomes their new password.
+ */
+export async function resetUserPassword(
+  userId: number,
+): Promise<BindingActionResult> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+  if (!user) return { success: false, error: "找不到此帳號" };
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password: "" },
+  });
+
+  return { success: true };
+}
+
+// ── Role Management (admin only) ──
+
+/**
+ * Update a user's role (admin / user).
+ */
+export async function updateUserRole(
+  userId: number,
+  role: "admin" | "user",
+): Promise<BindingActionResult> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+  if (!user) return { success: false, error: "找不到此帳號" };
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { role },
+  });
+
+  revalidatePath("/staff", "layout");
+  return { success: true };
+}

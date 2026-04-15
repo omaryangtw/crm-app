@@ -24,7 +24,12 @@ const NAV_LINKS = [
   { href: "/cases", label: "案件", icon: FileText },
   { href: "/contacts", label: "通聯紀錄", icon: Phone },
   { href: "/files", label: "文件", icon: FolderOpen },
+] as const;
+
+const ADMIN_LINKS = [
   { href: "/staff", label: "員工管理", icon: UserCog },
+  { href: "/admin/deletion-requests", label: "刪除審核", icon: ShieldCheck },
+  { href: "/admin/backups", label: "備份管理", icon: HardDrive },
 ] as const;
 
 export function NavBar() {
@@ -39,7 +44,7 @@ export function NavBar() {
         <div className="flex h-14 items-center justify-between">
           {/* Brand */}
           <Link href="/" className="text-base font-semibold text-foreground shrink-0">
-            原民 CRM
+            CRM
           </Link>
 
           {/* Desktop nav links */}
@@ -67,32 +72,27 @@ export function NavBar() {
               );
             })}
             {isAdmin && (
-              <Link
-                href="/admin/deletion-requests"
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5",
-                  pathname.startsWith("/admin/deletion-requests")
-                    ? "bg-muted text-foreground font-semibold"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                <ShieldCheck className="size-4" />
-                刪除審核
-              </Link>
-            )}
-            {isAdmin && (
-              <Link
-                href="/admin/backups"
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5",
-                  pathname.startsWith("/admin/backups")
-                    ? "bg-muted text-foreground font-semibold"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                <HardDrive className="size-4" />
-                備份管理
-              </Link>
+              <>
+                {ADMIN_LINKS.map((link) => {
+                  const isActive =
+                    pathname === link.href || pathname.startsWith(link.href + "/");
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={cn(
+                        "rounded-md px-3 py-2 text-sm font-medium transition-colors inline-flex items-center gap-1.5",
+                        isActive
+                          ? "bg-muted text-foreground font-semibold"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                    >
+                      <link.icon className="size-4" />
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </>
             )}
           </div>
 
@@ -177,36 +177,27 @@ export function NavBar() {
             })}
             {/* Mobile search trigger */}
             <GlobalSearchMobileTrigger onAfterClick={() => setMenuOpen(false)} />
-            {isAdmin && (
-              <Link
-                href="/admin/deletion-requests"
-                className={cn(
-                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  pathname.startsWith("/admin/deletion-requests")
-                    ? "bg-muted text-foreground font-semibold"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-                onClick={() => setMenuOpen(false)}
-              >
-                <ShieldCheck className="size-4" />
-                刪除審核
-              </Link>
-            )}
-            {isAdmin && (
-              <Link
-                href="/admin/backups"
-                className={cn(
-                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  pathname.startsWith("/admin/backups")
-                    ? "bg-muted text-foreground font-semibold"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-                onClick={() => setMenuOpen(false)}
-              >
-                <HardDrive className="size-4" />
-                備份管理
-              </Link>
-            )}
+            {isAdmin &&
+              ADMIN_LINKS.map((link) => {
+                const isActive =
+                  pathname === link.href || pathname.startsWith(link.href + "/");
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={cn(
+                      "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-muted text-foreground font-semibold"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <link.icon className="size-4" />
+                    {link.label}
+                  </Link>
+                );
+              })}
           </div>
           <div className="border-t border-border px-4 py-3 flex gap-2">
             {status === "authenticated" ? (

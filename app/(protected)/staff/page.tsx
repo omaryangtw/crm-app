@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageContainer } from "@/app/_components/page-container";
@@ -14,14 +15,16 @@ interface Props {
 }
 
 export default async function StaffPage({ searchParams }: Props) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  if (session.user.role !== "admin") redirect("/");
+
   const params = await searchParams;
   const q = params.q;
 
   const staff = await getStaffList(q || undefined);
 
-  const session = await auth();
-  const isAdmin = session?.user?.role === "admin";
-  const candidates = isAdmin ? await getAutoBindCandidates() : [];
+  const candidates = await getAutoBindCandidates();
 
   return (
     <PageContainer>
@@ -36,7 +39,7 @@ export default async function StaffPage({ searchParams }: Props) {
           </Link>
         }
       />
-      {isAdmin && candidates.length > 0 && (
+      {candidates.length > 0 && (
         <AutoBindBanner candidateCount={candidates.length} />
       )}
       <StaffTable staff={staff} searchQuery={q} />

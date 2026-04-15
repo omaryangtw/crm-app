@@ -22,11 +22,13 @@ import {
   bindStaffUser,
   unbindStaffUser,
   getUnboundUsers,
+  resetUserPassword,
+  updateUserRole,
 } from "@/app/_lib/actions/binding-actions";
 
 interface StaffBindingSectionProps {
   staffId: number;
-  boundUser: { id: number; email: string } | null;
+  boundUser: { id: number; email: string; role: string } | null;
 }
 
 export default function StaffBindingSection({
@@ -113,21 +115,67 @@ export default function StaffBindingSection({
       </CardHeader>
       <CardContent className="space-y-3">
         {boundUser ? (
-          /* Bound state: show email + unbind button */
-          <div className="flex items-center justify-between">
-            <div>
-              <label className="mb-1 block text-sm font-medium">
-                綁定帳號
-              </label>
-              <p className="text-sm">{boundUser.email}</p>
+          /* Bound state: show email + admin controls + unbind button */
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="mb-1 block text-sm font-medium">
+                  綁定帳號
+                </label>
+                <p className="text-sm">{boundUser.email}</p>
+              </div>
+              <Button
+                variant="destructive"
+                disabled={isPending}
+                onClick={handleUnbind}
+              >
+                {isPending ? "處理中…" : "解除綁定"}
+              </Button>
             </div>
-            <Button
-              variant="destructive"
-              disabled={isPending}
-              onClick={handleUnbind}
-            >
-              {isPending ? "處理中…" : "解除綁定"}
-            </Button>
+
+            {/* Role + Password management */}
+            <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">角色：</span>
+                <select
+                  className="rounded-md border border-border bg-background px-2 py-1 text-sm"
+                  value={boundUser.role}
+                  disabled={isPending}
+                  onChange={(e) => {
+                    const newRole = e.target.value as "admin" | "user";
+                    startTransition(async () => {
+                      const result = await updateUserRole(boundUser.id, newRole);
+                      if (result.success) {
+                        setMessage({ type: "success", text: `已變更角色為 ${newRole === "admin" ? "管理員" : "一般使用者"}` });
+                        router.refresh();
+                      } else {
+                        setMessage({ type: "error", text: result.error ?? "操作失敗" });
+                      }
+                    });
+                  }}
+                >
+                  <option value="user">一般使用者</option>
+                  <option value="admin">管理員</option>
+                </select>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isPending}
+                onClick={() => {
+                  startTransition(async () => {
+                    const result = await resetUserPassword(boundUser.id);
+                    if (result.success) {
+                      setMessage({ type: "success", text: "已重設密碼，使用者下次登入時輸入的密碼將成為新密碼" });
+                    } else {
+                      setMessage({ type: "error", text: result.error ?? "操作失敗" });
+                    }
+                  });
+                }}
+              >
+                {isPending ? "處理中…" : "重設密碼"}
+              </Button>
+            </div>
           </div>
         ) : (
           /* Unbound state: show selector + bind button */

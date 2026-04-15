@@ -30,11 +30,11 @@ export default async function StaffDetailPage({ params }: Props) {
   const isAdmin = session?.user?.role === "admin";
 
   // Query the User bound to this Staff (if any)
-  let boundUser: { id: number; email: string } | null = null;
+  let boundUser: { id: number; email: string; role: string } | null = null;
   if (isAdmin) {
     const user = await prisma.user.findUnique({
       where: { staffId },
-      select: { id: true, email: true },
+      select: { id: true, email: true, role: true },
     });
     boundUser = user;
   }

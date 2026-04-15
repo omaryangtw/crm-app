@@ -16,8 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "原民 CRM",
-  description: "臺南市原住民族服務管理系統",
+  title: "CRM",
 };
 
 export default function RootLayout({
