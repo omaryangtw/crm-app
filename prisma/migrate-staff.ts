@@ -42,6 +42,7 @@ const CORRECTIONS: Record<string, string> = {
   "StaffG": "StaffG",
   "StaffD": "StaffD",
   "Ingay": "Ingay",
+  "IngayIngay": "Ingay",
 };
 
 // ── Canonical staff registry ──
@@ -60,6 +61,10 @@ const STAFF_REGISTRY: { name: string; aliases: string[] }[] = [
   { name: "StaffG", aliases: [] },
   { name: "特助", aliases: [] },
   { name: "StaffH", aliases: [] },
+  { name: "StaffI", aliases: [] },
+  { name: "StaffTeam", aliases: [] },
+  { name: "StaffM", aliases: [] },
+  { name: "StaffJ", aliases: [] },
 ];
 
 // ── Build lookup map: name/alias → canonical name (case-insensitive) ──
@@ -94,6 +99,13 @@ export function parseNames(raw: string): string[] {
   );
   normalized = normalized.replace(
     /([A-Za-z])\s+([\u4e00-\u9fff])/g,
+    "$1/$2"
+  );
+
+  // Insert delimiter between two capitalized Latin words separated by space
+  // "Ingay AliasA" → "Ingay/AliasA", "Fox AliasA" → "Fox/AliasA"
+  normalized = normalized.replace(
+    /([A-Za-z])\s+([A-Z])/g,
     "$1/$2"
   );
 

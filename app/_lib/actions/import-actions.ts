@@ -252,18 +252,6 @@ export async function importCases(formData: FormData): Promise<ImportResult> {
     allErrors.push(...mapped.errors);
     const d = mapped.data;
 
-    // Skip records with no client association (same as seed.ts: `if (!c.ClientId) continue`)
-    if (!d.client_id) {
-      skipped++;
-      allErrors.push({
-        index: i + 1,
-        field: "client_id",
-        value: d.client_id,
-        message: "缺少族人 ID（ClientId 為空），已跳過",
-      });
-      continue;
-    }
-
     try {
       if (conflictStrategy === "skip") {
         const result = await prisma.$executeRawUnsafe(
@@ -384,18 +372,6 @@ export async function importContacts(formData: FormData): Promise<ImportResult> 
     const mapped = mapContactRecord(records[i], i + 1);
     allErrors.push(...mapped.errors);
     const d = mapped.data;
-
-    // Skip records with no client association (same as seed.ts: `if (!c.ClientId) continue`)
-    if (!d.client_id) {
-      skipped++;
-      allErrors.push({
-        index: i + 1,
-        field: "client_id",
-        value: d.client_id,
-        message: "缺少族人 ID（ClientId 為空），已跳過",
-      });
-      continue;
-    }
 
     try {
       if (conflictStrategy === "skip") {

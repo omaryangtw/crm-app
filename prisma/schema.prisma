@@ -193,8 +193,8 @@ model Case {
   note                 String?
   handle               String?
 
-  clientId  Int      @map("client_id")
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  Int?     @map("client_id")
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -212,8 +212,8 @@ model Contact {
   personInChargeLegacy String?      @map("person_in_charge_legacy")
   staffInCharge        Staff[]
 
-  clientId  Int      @map("client_id")
-  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  Int?     @map("client_id")
+  client    Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   caseId    Int?     @map("case_id")
   case      Case?    @relation(fields: [caseId], references: [id], onDelete: SetNull)

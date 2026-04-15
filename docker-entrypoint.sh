@@ -22,6 +22,12 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   } else {
     console.log('  Admin user already exists');
   }
+
+  // Ensure placeholder 'unknown' client exists (id=0) for orphan cases/contacts
+  await pool.query(
+    \"INSERT INTO clients (id, name, created_at, updated_at) VALUES (0, '未知', NOW(), NOW()) ON CONFLICT (id) DO NOTHING\"
+  );
+
   await pool.end();
 })();
 "
