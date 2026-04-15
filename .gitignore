@@ -44,3 +44,6 @@ next-env.d.ts
 # uploaded photos (keep .gitkeep)
 public/uploads/photos/*
 !public/uploads/photos/.gitkeep
+
+# backup data
+/backups/
