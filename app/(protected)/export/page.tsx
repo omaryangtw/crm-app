@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Papa from "papaparse";
 import { X } from "lucide-react";
 import { exportClients } from "@/app/_lib/actions/export-actions";
+import { getExportAuditLogs } from "@/app/_lib/actions/export-audit-actions";
+import type { ExportAuditEntry } from "@/app/_lib/actions/export-audit-actions";
 import { EXPORT_PRESETS } from "@/app/_lib/utils/export-utils";
 import type { ExportCriteria, ExportQuery } from "@/app/_lib/schemas/export-schema";
 import { Button } from "@/components/ui/button";
@@ -72,6 +74,17 @@ export default function ExportPage() {
   const [selectedColumns, setSelectedColumns] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [auditLogs, setAuditLogs] = useState<ExportAuditEntry[]>([]);
+
+  // Load audit logs on mount and after each export
+  const loadAuditLogs = useCallback(async () => {
+    const logs = await getExportAuditLogs();
+    setAuditLogs(logs);
+  }, []);
+
+  useEffect(() => {
+    void loadAuditLogs();
+  }, [loadAuditLogs]);
 
   // Restore last-used state from localStorage after client mount
   useEffect(() => {
@@ -139,6 +152,8 @@ export default function ExportPage() {
         return;
       }
       downloadCsv(result.data, filename);
+      // Refresh audit logs after successful export
+      void loadAuditLogs();
     } catch {
       setError("匯出失敗，請稍後再試");
     } finally {
@@ -566,6 +581,39 @@ export default function ExportPage() {
       >
         {loading ? "匯出中..." : "自訂匯出"}
       </Button>
+
+      {/* Export audit history */}
+      {auditLogs.length > 0 && (
+        <div className="mt-8 rounded-md border border-border bg-card p-4">
+          <h2 className="text-sm font-medium text-foreground mb-3">匯出紀錄</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-muted-foreground">
+                  <th className="pb-2 pr-4 font-medium">時間</th>
+                  <th className="pb-2 pr-4 font-medium">操作者</th>
+                  <th className="pb-2 pr-4 font-medium">類型</th>
+                  <th className="pb-2 pr-4 font-medium">筆數</th>
+                </tr>
+              </thead>
+              <tbody>
+                {auditLogs.map((log) => (
+                  <tr key={log.id} className="border-b border-border last:border-0">
+                    <td className="py-2 pr-4 whitespace-nowrap">
+                      {new Date(log.createdAt).toLocaleString("zh-TW")}
+                    </td>
+                    <td className="py-2 pr-4">{log.userEmail}</td>
+                    <td className="py-2 pr-4">
+                      {log.exportType === "custom" ? "自訂匯出" : log.exportType === "googleContacts" ? "Google 通訊錄" : log.exportType}
+                    </td>
+                    <td className="py-2 pr-4">{log.resultCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
