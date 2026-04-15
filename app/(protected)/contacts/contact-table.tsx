@@ -87,7 +87,7 @@ function ActionsCell({ row }: { row: ContactRow }) {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"
-            onSelect={() => setDeleteOpen(true)}
+            onClick={() => setDeleteOpen(true)}
           >
             刪除
           </DropdownMenuItem>

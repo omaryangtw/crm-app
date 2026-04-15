@@ -77,7 +77,7 @@ function ActionsCell({ row }: { row: CaseRow }) {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"
-            onSelect={() => setDeleteOpen(true)}
+            onClick={() => setDeleteOpen(true)}
           >
             刪除
           </DropdownMenuItem>

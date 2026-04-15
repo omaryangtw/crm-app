@@ -34,6 +34,7 @@ export function TodoDashboard({ todos, sessionStaffId }: TodoDashboardProps) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingTodo, setEditingTodo] = useState<TodoItem | null>(null);
   const [deletingTodoId, setDeletingTodoId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const filteredTodos = useMemo(() => {
     return filterTodos(todos, sessionStaffId, filterMode);
@@ -47,10 +48,12 @@ export function TodoDashboard({ todos, sessionStaffId }: TodoDashboardProps) {
   }
 
   function handleDelete(todoId: number) {
+    setIsDeleting(true);
     startTransition(async () => {
       await deleteTodo(todoId);
       if (selectedTodo?.id === todoId) setSelectedTodo(null);
       setDeletingTodoId(null);
+      setIsDeleting(false);
     });
   }
 
@@ -256,12 +259,12 @@ export function TodoDashboard({ todos, sessionStaffId }: TodoDashboardProps) {
       {/* Delete confirmation */}
       <ConfirmDialog
         open={deletingTodoId !== null}
-        onOpenChange={(v) => { if (!v) setDeletingTodoId(null); }}
+        onOpenChange={(v) => { if (!v && !isDeleting) setDeletingTodoId(null); }}
         title="刪除待辦"
         description="確定要刪除此待辦事項嗎？此操作無法復原。"
         variant="destructive"
         confirmLabel="刪除"
-        loading={isPending}
+        loading={isDeleting}
         onConfirm={() => {
           if (deletingTodoId !== null) handleDelete(deletingTodoId);
         }}
