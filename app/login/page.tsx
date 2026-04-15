@@ -42,7 +42,10 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted px-4">
       <div className="w-full max-w-sm rounded-lg border bg-card p-6 shadow-sm">
-        <h1 className="mb-6 text-center text-xl font-semibold">登入</h1>
+        <h1 className="mb-2 text-center text-xl font-semibold">登入</h1>
+        <p className="mb-6 text-center text-sm text-muted-foreground">
+          請登入以使用系統
+        </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>

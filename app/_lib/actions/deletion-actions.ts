@@ -135,6 +135,8 @@ async function findEntity(
       return prisma.case.findUnique({ where: { id: entityId } });
     case "Contact":
       return prisma.contact.findUnique({ where: { id: entityId } });
+    default:
+      return null;
   }
 }
 

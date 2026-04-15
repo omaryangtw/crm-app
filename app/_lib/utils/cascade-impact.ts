@@ -56,5 +56,7 @@ export async function getCascadeImpact(
     }
     case "Contact":
       return { ...ZERO_IMPACT };
+    default:
+      return { ...ZERO_IMPACT };
   }
 }

@@ -753,6 +753,8 @@ describe("Integration: importCases referential integrity", () => {
 
   it("skips case when client_id does not exist and records ValidationError", async () => {
     const mockExecuteRawUnsafe = vi.fn()
+      // First record: FK violation from DB
+      .mockRejectedValueOnce(new Error('insert or update on table "cases" violates foreign key constraint'))
       // Sequence reset
       .mockResolvedValueOnce(undefined);
 
@@ -761,10 +763,6 @@ describe("Integration: importCases referential integrity", () => {
     vi.doMock("@/app/_lib/db", () => ({
       prisma: {
         $executeRawUnsafe: mockExecuteRawUnsafe,
-        client: {
-          // Return empty list — no clients exist
-          findMany: vi.fn().mockResolvedValue([]),
-        },
       },
     }));
 
@@ -791,12 +789,12 @@ describe("Integration: importCases referential integrity", () => {
     expect(result.success).toBe(true);
     expect(result.table).toBe("cases");
     expect(result.total).toBe(1);
-    expect(result.skipped).toBe(1);
+    expect(result.failed).toBe(1);
     expect(result.inserted).toBe(0);
 
-    // Verify ValidationError with correct message
+    // Verify ValidationError with FK violation message
     const refError = result.errors.find(
-      (e) => e.field === "client_id" && e.message === "參照的族人 ID 不存在",
+      (e) => e.field === "client_id" && e.message.includes("不存在於資料庫"),
     );
     expect(refError).toBeDefined();
     expect(refError!.index).toBe(1);

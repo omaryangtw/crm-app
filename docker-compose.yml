@@ -7,8 +7,10 @@ services:
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
       - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_TRUST_HOST=true
       - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:8080}
       - BACKUP_DIR=/app/backups
+      - ADMIN_DEFAULT_PASSWORD=${ADMIN_DEFAULT_PASSWORD:-changeme}
     volumes:
       - backup-data:/app/backups
       - pdf-files:/app/public/files

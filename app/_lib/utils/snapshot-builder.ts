@@ -32,6 +32,8 @@ export async function buildEntitySnapshot(
       return buildCaseSnapshot(entityId);
     case "Contact":
       return buildContactSnapshot(entityId);
+    default:
+      return null;
   }
 }
 

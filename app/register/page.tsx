@@ -9,6 +9,7 @@ import {
   type RegisterInput,
 } from "@/app/_lib/schemas/auth-schema";
 import { registerUser } from "@/app/_lib/actions/auth-actions";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -39,7 +40,21 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/login");
+    // Auto-login after successful registration
+    const signInResult = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (signInResult?.error) {
+      // Registration succeeded but auto-login failed — redirect to login
+      router.push("/login");
+      return;
+    }
+
+    router.push("/");
+    router.refresh();
   }
 
   return (

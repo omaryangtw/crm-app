@@ -38,7 +38,7 @@ export default async function CasesPage({ searchParams }: Props) {
   const filterWhere = buildFilterWhere(activeFilters, caseFilterConfig);
   const relationLabels = await resolveRelationLabels(activeFilters, caseFilterConfig);
   const andClauses = [searchWhere, filterWhere].filter(
-    (w) => w && Object.keys(w).length > 0,
+    (w): w is Record<string, unknown> => w != null && Object.keys(w).length > 0,
   );
   const where = andClauses.length > 0 ? { AND: andClauses } : undefined;
 

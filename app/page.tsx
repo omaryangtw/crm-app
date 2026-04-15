@@ -1,4 +1,5 @@
 import { prisma } from "@/app/_lib/db";
+import { redirect } from "next/navigation";
 import { format, startOfMonth } from "date-fns";
 import { Users, FileText, Phone, AlertTriangle } from "lucide-react";
 import { auth } from "@/app/_lib/auth";
@@ -14,6 +15,27 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const session = await auth();
+  if (!session) {
+    redirect("/login");
+  }
+
+  // Non-admin users must be bound to a Staff record
+  const isAdmin = session.user.role === "admin";
+  const isBound = session.user.staffId !== null && session.user.staffId !== undefined;
+
+  if (!isAdmin && !isBound) {
+    return (
+      <PageContainer>
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <h1 className="text-xl font-semibold">帳號尚未啟用</h1>
+          <p className="mt-2 text-muted-foreground">
+            請聯繫管理員將您的帳號綁定至員工資料後即可使用系統。
+          </p>
+        </div>
+      </PageContainer>
+    );
+  }
+
   const sessionStaffId = session?.user?.staffId ?? null;
   const userId = session?.user?.id ? parseInt(session.user.id, 10) : null;
 
