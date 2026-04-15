@@ -44,7 +44,7 @@ export async function createTodo(
     const todo = await prisma.todo.create({
       data: {
         ...sanitized,
-        clientId,
+        ...(clientId ? { clientId } : { clientId: null }),
         staffInCharge: {
           connect: ids.map((id) => ({ id })),
         },
@@ -143,28 +143,38 @@ export async function completeTodo(
       todo.note ?? ""
     );
 
-    // 5. Create contact record and mark todo done in a transaction
-    const [, updatedTodo] = await prisma.$transaction([
-      prisma.contact.create({
-        data: {
-          date: new Date(),
-          record: message,
-          clientId: todo.clientId,
-          isSuccess: true,
-          staffInCharge: {
-            connect: todo.staffInCharge.map((s) => ({ id: s.id })),
+    // 5. Mark todo done, and create contact record if todo has a client
+    if (todo.clientId) {
+      const [, updatedTodo] = await prisma.$transaction([
+        prisma.contact.create({
+          data: {
+            date: new Date(),
+            record: message,
+            clientId: todo.clientId,
+            isSuccess: true,
+            staffInCharge: {
+              connect: todo.staffInCharge.map((s) => ({ id: s.id })),
+            },
           },
-        },
-      }),
-      prisma.todo.update({
+        }),
+        prisma.todo.update({
+          where: { id },
+          data: { done: true },
+        }),
+      ]);
+
+      revalidatePath("/");
+      revalidatePath(`/clients/${todo.clientId}`);
+      return { success: true, data: { id: updatedTodo.id } };
+    } else {
+      const updatedTodo = await prisma.todo.update({
         where: { id },
         data: { done: true },
-      }),
-    ]);
+      });
 
-    revalidatePath("/");
-    revalidatePath(`/clients/${todo.clientId}`);
-    return { success: true, data: { id: updatedTodo.id } };
+      revalidatePath("/");
+      return { success: true, data: { id: updatedTodo.id } };
+    }
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === "P2025") return { success: false, error: "找不到資料" };

@@ -54,8 +54,9 @@ export default async function Home() {
   const serialized = todos.map((t) => ({
     id: t.id,
     date: t.date ? format(t.date, "yyyy-MM-dd") : null,
+    createdAt: format(t.createdAt, "yyyy-MM-dd"),
     note: t.note,
-    client: { id: t.client.id, name: t.client.name },
+    client: t.client ? { id: t.client.id, name: t.client.name } : null,
     staffInCharge: t.staffInCharge.map((s) => ({ id: s.id, name: s.name })),
   }));
 

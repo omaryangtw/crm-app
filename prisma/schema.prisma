@@ -231,8 +231,8 @@ model Todo {
   done Boolean   @default(false)
   note String?
 
-  clientId      Int      @map("client_id")
-  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      Int?     @map("client_id")
+  client        Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   staffInCharge Staff[]
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
