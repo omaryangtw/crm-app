@@ -82,13 +82,13 @@ export async function globalSearch(
     cases: cases.map((c) => ({
       id: c.id,
       name: c.name,
-      clientName: c.client.name,
+      clientName: c.client?.name ?? null,
       status: c.status,
     })),
     contacts: contacts.map((ct) => ({
       id: ct.id,
       record: ct.record,
-      clientName: ct.client.name,
+      clientName: ct.client?.name ?? null,
       date: ct.date,
     })),
   };

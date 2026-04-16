@@ -37,9 +37,8 @@ interface CaseRow {
   status: string | null;
   typesMajor: string | null;
   staffInCharge: { id: number; name: string }[];
-  client: { id: number; name: string | null };
+  client: { id: number; name: string | null } | null;
 }
-
 const STATUS_BADGE_VARIANT: Record<string, "default" | "secondary"> = {
   in_progress: "default",
   closed: "secondary",

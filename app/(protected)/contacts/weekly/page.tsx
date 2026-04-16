@@ -47,12 +47,16 @@ export default async function WeeklyContactsPage() {
                       : "—"}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <Link
-                      href={`/clients/${contact.client.id}`}
-                      className="text-primary hover:underline"
-                    >
-                      {contact.client.name ?? "—"}
-                    </Link>
+                    {contact.client ? (
+                      <Link
+                        href={`/clients/${contact.client.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {contact.client.name ?? "—"}
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {contact.contactType

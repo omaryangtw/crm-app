@@ -38,7 +38,7 @@ interface ContactRow {
   isSuccess: boolean;
   record: string | null;
   staffInCharge: { id: number; name: string }[];
-  client: { id: number; name: string | null };
+  client: { id: number; name: string | null } | null;
   case?: { id: number; name: string | null } | null;
 }
 

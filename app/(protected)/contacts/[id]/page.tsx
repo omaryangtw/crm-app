@@ -54,12 +54,16 @@ export default async function ContactDetailPage({ params }: Props) {
           <CardTitle className="text-base">關聯族人</CardTitle>
         </CardHeader>
         <CardContent>
-          <Link
-            href={`/clients/${contact.client.id}`}
-            className="text-primary hover:underline"
-          >
-            {contact.client.name ?? "(未命名)"} (ID: {contact.client.id})
-          </Link>
+          {contact.client ? (
+            <Link
+              href={`/clients/${contact.client.id}`}
+              className="text-primary hover:underline"
+            >
+              {contact.client.name ?? "(未命名)"} (ID: {contact.client.id})
+            </Link>
+          ) : (
+            <span className="text-muted-foreground">無關聯族人</span>
+          )}
         </CardContent>
       </Card>
 

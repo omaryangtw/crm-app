@@ -18,7 +18,7 @@ interface ContactRow {
 
 interface CaseContactsSectionProps {
   caseId: number;
-  clientId: number;
+  clientId: number | null;
   sessionStaffId: number | null;
   contacts: ContactRow[];
 }
@@ -42,16 +42,19 @@ export function CaseContactsSection({
             variant="outline"
             size="sm"
             onClick={() => setShowQuickForm(!showQuickForm)}
+            disabled={clientId === null}
           >
             {showQuickForm ? "收合" : "快速通聯"}
           </Button>
-          <Link href={`/contacts/new?clientId=${clientId}&caseId=${caseId}`}>
-            <Button size="sm">新增通聯</Button>
-          </Link>
+          {clientId !== null && (
+            <Link href={`/contacts/new?clientId=${clientId}&caseId=${caseId}`}>
+              <Button size="sm">新增通聯</Button>
+            </Link>
+          )}
         </div>
       }
     >
-      {showQuickForm && (
+      {showQuickForm && clientId !== null && (
         <div className="mb-4 rounded-lg border bg-muted/50 p-4">
           <QuickContactForm
             clientId={clientId}

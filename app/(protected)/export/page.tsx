@@ -15,6 +15,8 @@ import {
 import type { ImportResult } from "@/app/_lib/actions/import-actions";
 import { getImportAuditLogs } from "@/app/_lib/actions/import-audit-actions";
 import type { ImportAuditEntry } from "@/app/_lib/actions/import-audit-actions";
+import { runStaffMigration } from "@/app/_lib/actions/staff-migration-action";
+import type { StaffMigrationResult } from "@/app/_lib/actions/staff-migration-action";
 import type { ExportAuditEntry } from "@/app/_lib/actions/export-audit-actions";
 import { EXPORT_PRESETS } from "@/app/_lib/utils/export-utils";
 import type { ExportCriteria, ExportQuery } from "@/app/_lib/schemas/export-schema";
@@ -402,9 +404,62 @@ function ImportSection() {
       {/* Import result display (Task 7.3) */}
       {importResult && <ImportResultDisplay result={importResult} />}
 
+      {/* Staff migration */}
+      <StaffMigrationSection />
+
       {/* Import audit log display (Task 7.4) */}
       <ImportAuditDisplay logs={auditLogs} />
     </div>
+  );
+}
+
+// ── Staff Migration Section ──
+
+function StaffMigrationSection() {
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState<StaffMigrationResult | null>(null);
+
+  async function handleRun() {
+    setRunning(true);
+    setResult(null);
+    try {
+      const r = await runStaffMigration();
+      setResult(r);
+    } catch {
+      setResult({ success: false, staffCreated: 0, caseLinks: 0, contactLinks: 0, unresolved: [], error: "執行失敗" });
+    } finally {
+      setRunning(false);
+    }
+  }
+
+  return (
+    <Card className="mt-4">
+      <CardHeader>
+        <CardTitle>員工綁定</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          從案件與通聯的承辦人欄位自動建立員工資料並綁定。此操作會重建所有員工記錄。
+        </p>
+        <Button onClick={handleRun} disabled={running} variant="outline">
+          {running ? "執行中..." : "執行員工綁定"}
+        </Button>
+        {result && result.success && (
+          <div className="rounded-md bg-muted p-3 text-sm space-y-1">
+            <p>建立 {result.staffCreated} 位員工</p>
+            <p>案件綁定 {result.caseLinks} 筆、通聯綁定 {result.contactLinks} 筆</p>
+            {result.unresolved.length > 0 && (
+              <p className="text-muted-foreground">
+                無法解析：{result.unresolved.join("、")}
+              </p>
+            )}
+          </div>
+        )}
+        {result && !result.success && (
+          <p className="text-sm text-destructive">{result.error}</p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

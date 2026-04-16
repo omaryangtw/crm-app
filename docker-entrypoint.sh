@@ -4,8 +4,7 @@ set -e
 echo "Running database migrations..."
 npx prisma migrate deploy
 
-echo "Ensuring admin user exists..."
-# Use raw SQL via node + pg (already in node_modules) to create admin if not exists
+echo "Ensuring admin user and placeholder data..."
 node -e "
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
@@ -22,15 +21,21 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   } else {
     console.log('  Admin user already exists');
   }
-
-  // Ensure placeholder 'unknown' client exists (id=0) for orphan cases/contacts
-  await pool.query(
-    \"INSERT INTO clients (id, name, created_at, updated_at) VALUES (0, '未知', NOW(), NOW()) ON CONFLICT (id) DO NOTHING\"
-  );
-
+  await pool.query(\"INSERT INTO clients (id, name, created_at, updated_at) VALUES (0, '未知', NOW(), NOW()) ON CONFLICT (id) DO NOTHING\");
   await pool.end();
 })();
 "
+
+echo "Checking if staff migration is needed..."
+STAFF_COUNT=$(node -e "const{Pool}=require('pg');const p=new Pool({connectionString:process.env.DATABASE_URL});p.query('SELECT COUNT(*)::int as c FROM staff').then(r=>{console.log(r.rows[0].c);p.end()})")
+CASE_COUNT=$(node -e "const{Pool}=require('pg');const p=new Pool({connectionString:process.env.DATABASE_URL});p.query('SELECT COUNT(*)::int as c FROM cases').then(r=>{console.log(r.rows[0].c);p.end()})")
+
+if [ "$STAFF_COUNT" = "0" ] && [ "$CASE_COUNT" != "0" ]; then
+  echo "Staff table empty but cases exist — running staff migration..."
+  npx tsx prisma/migrate-staff.ts
+else
+  echo "Staff migration skipped (staff: $STAFF_COUNT, cases: $CASE_COUNT)"
+fi
 
 echo "Starting application..."
 exec node server.js

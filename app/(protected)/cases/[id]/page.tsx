@@ -71,12 +71,16 @@ export default async function CaseDetailPage({ params }: Props) {
       <CardStack>
         {/* Associated client */}
         <SectionCard title="關聯族人">
-          <Link
-            href={`/clients/${caseRecord.client.id}`}
-            className="text-primary hover:underline"
-          >
-            {caseRecord.client.name ?? "(未命名)"} (ID: {caseRecord.client.id})
-          </Link>
+          {caseRecord.client ? (
+            <Link
+              href={`/clients/${caseRecord.client.id}`}
+              className="text-primary hover:underline"
+            >
+              {caseRecord.client.name ?? "(未命名)"} (ID: {caseRecord.client.id})
+            </Link>
+          ) : (
+            <span className="text-muted-foreground">無關聯族人</span>
+          )}
         </SectionCard>
 
         {/* Case details */}
