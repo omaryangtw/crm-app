@@ -73,13 +73,20 @@ export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
       count={familyMembers.length}
       className="mb-8"
       action={
-        <Button
-          type="button"
-          size="sm"
-          onClick={() => setShowForm(!showForm)}
-        >
-          {showForm ? "取消" : "新增關係"}
-        </Button>
+        <div className="flex gap-2">
+          <Link href={`/clients/new?copyFrom=${clientId}`}>
+            <Button type="button" size="sm" variant="outline">
+              新增家人
+            </Button>
+          </Link>
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => setShowForm(!showForm)}
+          >
+            {showForm ? "取消" : "新增關係"}
+          </Button>
+        </div>
       }
     >
         {error && (
