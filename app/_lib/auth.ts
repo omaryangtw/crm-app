@@ -21,7 +21,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Password reset flow: empty password means admin reset it.
         // Accept whatever the user types and save it as the new password.
         if (user.password === "") {
-          const newHash = await bcrypt.hash(credentials.password as string, 10);
+          const newPassword = credentials.password as string;
+          // Validate: 8-16 chars, alphanumeric only (same rules as registration)
+          if (newPassword.length < 8 || newPassword.length > 16 || !/^[a-zA-Z0-9]+$/.test(newPassword)) {
+            return null;
+          }
+          const newHash = await bcrypt.hash(newPassword, 10);
           await prisma.user.update({
             where: { id: user.id },
             data: { password: newHash },

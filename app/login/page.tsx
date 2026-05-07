@@ -73,6 +73,9 @@ export default function LoginPage() {
               autoComplete="current-password"
               {...register("password")}
             />
+            <p className="mt-1 text-xs text-muted-foreground">
+              8-16 字元，僅限英文字母與數字
+            </p>
             {errors.password && (
               <p className="mt-1 text-sm text-destructive">{errors.password.message}</p>
             )}
