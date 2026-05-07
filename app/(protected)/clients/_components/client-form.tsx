@@ -214,7 +214,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel,
               <label htmlFor="idn" className={labelClass}>身分證字號</label>
               <Input id="idn" type="text" {...register("idn")} />
             </div>
-            <SelectField id="sex" label="性別" options={SEX_LABELS} registration={register("sex")} error={errors.sex?.message} />
+            <SelectField id="sex" label="性別 *" options={SEX_LABELS} registration={register("sex")} error={errors.sex?.message} />
             <div>
               <label htmlFor="birthday" className={labelClass}>生日</label>
               <Input id="birthday" type="date" {...register("birthday")} />
@@ -263,8 +263,9 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel,
               <Input id="phoneAltNote" type="text" {...register("phoneAltNote")} />
             </div>
             <div>
-              <label htmlFor="mobile" className={labelClass}>手機</label>
+              <label htmlFor="mobile" className={labelClass}>手機 *</label>
               <Input id="mobile" type="text" {...register("mobile")} />
+              {errors.mobile && <p className={errorClass}>{errors.mobile.message}</p>}
             </div>
             <div>
               <label htmlFor="mobileNote" className={labelClass}>手機備註</label>
