@@ -103,13 +103,23 @@ export function TodoDashboard({ todos, sessionStaffId }: TodoDashboardProps) {
                     <div className="flex items-center gap-4 min-w-0">
                       <span
                         className={`text-sm shrink-0 rounded px-1.5 py-0.5 ${
-                          todo.date && todo.date <= new Date().toISOString().slice(0, 10)
-                            ? "bg-destructive/15 text-destructive font-medium"
-                            : "text-muted-foreground"
+                          !todo.date
+                            ? "text-muted-foreground"
+                            : todo.date < new Date().toISOString().slice(0, 10)
+                              ? "bg-destructive/15 text-destructive font-medium"
+                              : todo.date === new Date().toISOString().slice(0, 10)
+                                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 font-medium"
+                                : "text-muted-foreground"
                         }`}
                         title="期限"
                       >
-                        {todo.date ? `期限 ${todo.date}` : "無期限"}
+                        {!todo.date
+                          ? "無期限"
+                          : todo.date < new Date().toISOString().slice(0, 10)
+                            ? `逾期 ${todo.date}`
+                            : todo.date === new Date().toISOString().slice(0, 10)
+                              ? "今日到期"
+                              : `期限 ${todo.date}`}
                       </span>
                     {todo.client ? (
                       <Link
