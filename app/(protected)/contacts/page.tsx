@@ -50,7 +50,7 @@ export default async function ContactsPage({ searchParams }: Props) {
     where,
     skip,
     take: pageSize,
-    orderBy: { createdAt: "desc" },
+    orderBy: { date: "desc" },
     include: {
       client: { select: { id: true, name: true } },
       staffInCharge: { select: { id: true, name: true } },

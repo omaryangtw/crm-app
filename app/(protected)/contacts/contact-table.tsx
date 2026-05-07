@@ -261,7 +261,7 @@ export function ContactTable({ contacts, searchQuery, pagination, filterConfig, 
 
   return (
     <div className="space-y-4">
-      <SearchInput placeholder="搜尋通聯紀錄…" />
+      <SearchInput placeholder="搜尋通聯（紀錄內容、族人姓名）" />
       {filterConfig && (
         <FilterBar config={filterConfig} activeFilters={activeFilters ?? []} relationLabels={relationLabels} />
       )}
