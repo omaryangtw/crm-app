@@ -10,7 +10,6 @@ import {
   Users,
   FileText,
   Phone,
-  FolderOpen,
   UserCog,
   ShieldCheck,
   HardDrive,
@@ -24,7 +23,6 @@ const NAV_LINKS = [
   { href: "/clients", label: "族人", icon: Users },
   { href: "/cases", label: "案件", icon: FileText },
   { href: "/contacts", label: "通聯紀錄", icon: Phone },
-  { href: "/files", label: "文件", icon: FolderOpen },
 ] as const;
 
 const ADMIN_LINKS = [
