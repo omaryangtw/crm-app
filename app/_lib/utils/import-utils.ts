@@ -344,7 +344,7 @@ export function parseJsonPayload(text: string): ParseResult {
   }
 
   if (parsed.length === 0) {
-    return { success: false, error: "檔案不包含任何記錄" };
+    return { success: false, error: "檔案不包含任何紀錄" };
   }
 
   return { success: true, records: parsed as Record<string, unknown>[] };

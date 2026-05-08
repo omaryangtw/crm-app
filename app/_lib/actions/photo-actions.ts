@@ -157,7 +157,7 @@ export async function deletePhoto(
     where: { id: photoId },
   });
   if (!record) {
-    return { success: false, error: "照片記錄不存在" };
+    return { success: false, error: "照片紀錄不存在" };
   }
 
   // 3. Delete files from filesystem (silently ignore if not found)

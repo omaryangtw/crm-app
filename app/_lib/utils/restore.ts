@@ -738,7 +738,7 @@ export async function applyRestore(
     for (const conflict of allConflicts) {
       const key = `${conflict.tableName}:${conflict.id}`;
       if (!resolutionMap.has(key)) {
-        throw new Error("尚有未解決的衝突記錄");
+        throw new Error("尚有未解決的衝突紀錄");
       }
     }
 
@@ -747,7 +747,7 @@ export async function applyRestore(
     for (const res of conflictResolutions) {
       const key = `${res.tableName}:${res.recordId}`;
       if (!conflictKeys.has(key)) {
-        throw new Error("尚有未解決的衝突記錄");
+        throw new Error("尚有未解決的衝突紀錄");
       }
     }
 

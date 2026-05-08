@@ -118,7 +118,7 @@ function ImportResultDisplay({ result }: { result: ImportResult }) {
       <CardContent className="space-y-3">
         {allSuccess && totalSuccess > 0 && (
           <p className="text-sm text-green-700 dark:text-green-400">
-            匯入完成，共 {totalSuccess} 筆記錄成功匯入
+            匯入完成，共 {totalSuccess} 筆紀錄成功匯入
           </p>
         )}
 
@@ -155,7 +155,7 @@ function ImportResultDisplay({ result }: { result: ImportResult }) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border text-left text-muted-foreground">
-                      <th className="px-3 py-2 font-medium">記錄</th>
+                      <th className="px-3 py-2 font-medium">紀錄</th>
                       <th className="px-3 py-2 font-medium">欄位</th>
                       <th className="px-3 py-2 font-medium">錯誤描述</th>
                     </tr>
@@ -439,7 +439,7 @@ function StaffMigrationSection() {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          從案件與通聯的承辦人欄位自動建立員工資料並連結。此操作會重建所有員工記錄。
+          從案件與通聯的承辦人欄位自動建立員工資料並連結。此操作會重建所有員工紀錄。
         </p>
         <Button onClick={handleRun} disabled={running} variant="outline">
           {running ? "執行中..." : "執行員工連結"}

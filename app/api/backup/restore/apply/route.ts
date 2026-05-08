@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: message }, { status: 409 });
     }
 
-    if (message === "尚有未解決的衝突記錄") {
+    if (message === "尚有未解決的衝突紀錄") {
       return NextResponse.json({ error: message }, { status: 400 });
     }
 

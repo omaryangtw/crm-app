@@ -180,7 +180,7 @@ export function RestorePreviewDialog({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium">
-                    衝突記錄（{resolvedCount}/{totalConflicts} 已解決）
+                    衝突紀錄（{resolvedCount}/{totalConflicts} 已解決）
                   </h3>
                   <div className="flex gap-2">
                     <Button
@@ -247,7 +247,7 @@ export function RestorePreviewDialog({
               disabled={!allResolved}
               title={
                 !allResolved
-                  ? "請先解決所有衝突記錄"
+                  ? "請先解決所有衝突紀錄"
                   : "確認套用還原"
               }
             >
