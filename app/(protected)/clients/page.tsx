@@ -47,10 +47,10 @@ export default async function ClientsPage({ searchParams }: Props) {
 
   const activeFilters = parseFilters(params, clientFilterConfig);
   const filterWhere = buildFilterWhere(activeFilters, clientFilterConfig);
-  const andClauses = [searchWhere, filterWhere].filter(
+  const andClauses = [searchWhere, filterWhere, { id: { not: 0 } }].filter(
     (w): w is Record<string, unknown> => w != null && Object.keys(w).length > 0,
   );
-  const where = andClauses.length > 0 ? { AND: andClauses } : undefined;
+  const where = { AND: andClauses };
 
   const total = await prisma.client.count({ where });
   const totalPages = Math.max(1, Math.ceil(total / pageSize));

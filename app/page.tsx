@@ -51,7 +51,7 @@ export default async function Home() {
           staffInCharge: { select: { id: true, name: true } },
         },
       }),
-      prisma.client.count(),
+      prisma.client.count({ where: { id: { not: 0 } } }),
       prisma.case.count({ where: { status: "in_progress" } }),
       prisma.contact.count({ where: { date: { gte: startOfCurrentMonth } } }),
       prisma.client.count({
