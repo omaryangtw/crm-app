@@ -19,6 +19,7 @@ export interface BirthdayClientRow {
 export default async function BirthdayPage() {
   const clients = await prisma.client.findMany({
     where: {
+      id: { not: 0 },
       birthday: { not: null },
       addr: { not: null },
       OR: [{ phone: { not: null } }, { mobile: { not: null } }],

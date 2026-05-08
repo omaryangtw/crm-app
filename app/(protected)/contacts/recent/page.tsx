@@ -7,6 +7,7 @@ export default async function RecentContactsPage() {
   // Fetch living, plain-mountain, callable clients who have at least one successful contact
   const clients = await prisma.client.findMany({
     where: {
+      id: { not: 0 },
       isDead: false,
       plainMountain: "plain",
       canCall: true,

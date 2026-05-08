@@ -46,7 +46,10 @@ export async function exportClients(
   }
 
   try {
-    const clients = await prisma.client.findMany({ where, select });
+    const clients = await prisma.client.findMany({
+      where: { ...where, id: { not: 0 } },
+      select,
+    });
 
     const userId = parseInt(session.user.id ?? "0", 10);
     const userEmail = session.user.email ?? "";
@@ -86,6 +89,7 @@ async function exportGoogleContacts(
   try {
     const clients = await prisma.client.findMany({
       where: {
+        id: { not: 0 },
         isDead: false,
         addr: { not: null },
       },

@@ -5,6 +5,7 @@ export default async function NoContactPage() {
   // Fetch living, plain-mountain clients with zero successful contacts
   const clients = await prisma.client.findMany({
     where: {
+      id: { not: 0 },
       isDead: false,
       plainMountain: "plain",
       contacts: {

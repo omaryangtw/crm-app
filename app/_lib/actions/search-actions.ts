@@ -34,6 +34,7 @@ export async function globalSearch(
   const [clients, cases, contacts] = await Promise.all([
     prisma.client.findMany({
       where: {
+        id: { not: 0 },
         OR: [
           { name: { contains: query, mode: "insensitive" } },
           { idn: { contains: query, mode: "insensitive" } },

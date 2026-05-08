@@ -56,6 +56,7 @@ export default async function Home() {
       prisma.contact.count({ where: { date: { gte: startOfCurrentMonth } } }),
       prisma.client.count({
         where: {
+          id: { not: 0 },
           contacts: {
             none: {
               date: { gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) },

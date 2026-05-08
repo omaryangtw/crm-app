@@ -11,6 +11,7 @@ export default async function HouseholdCheckPage() {
   // Get all clients with addr and canMail=true
   const clients = await prisma.client.findMany({
     where: {
+      id: { not: 0 },
       addr: { not: null },
       canMail: true,
     },

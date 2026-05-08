@@ -5,7 +5,7 @@ import { prisma } from "@/app/_lib/db";
 export async function searchClientsByName(query: string) {
   if (!query || query.length < 2) return [];
   const clients = await prisma.client.findMany({
-    where: { name: { contains: query, mode: "insensitive" } },
+    where: { id: { not: 0 }, name: { contains: query, mode: "insensitive" } },
     select: { id: true, name: true },
     take: 10,
   });
