@@ -56,10 +56,11 @@ export default async function ClientDetailPage({ params }: Props) {
     where: { id: clientId },
     include: {
       cases: {
+        orderBy: { updatedAt: "desc" },
         include: { staffInCharge: { select: { id: true, name: true } } },
       },
       contacts: {
-        orderBy: [{ date: "asc" }, { createdAt: "asc" }],
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
         include: {
           staffInCharge: { select: { id: true, name: true } },
           case: { select: { id: true, name: true } },
@@ -101,7 +102,7 @@ export default async function ClientDetailPage({ params }: Props) {
       />
 
       <PageHeader
-        title={`族人詳情 — ${client.name ?? "(未命名)"}`}
+        title={`族人詳情 — ${client.name ?? "(未命名)"}${client.isDead ? " (已歿)" : ""}`}
         actions={
           <>
             <Link href={`/clients/${client.id}/edit`}>
@@ -195,7 +196,7 @@ export default async function ClientDetailPage({ params }: Props) {
             </CardHeader>
             <CardContent>
               <InfoGrid className="text-sm">
-                <InfoRow label="城市" value={client.city} />
+                <InfoRow label="縣市" value={client.city} />
                 <InfoRow label="區域" value={client.dist} />
                 <InfoRow label="里" value={client.vill} />
                 <InfoRow label="地址" value={client.addr} />
@@ -212,7 +213,7 @@ export default async function ClientDetailPage({ params }: Props) {
               </CardHeader>
               <CardContent>
                 <InfoGrid className="text-sm">
-                  <InfoRow label="城市" value={client.cityAlt} />
+                  <InfoRow label="縣市" value={client.cityAlt} />
                   <InfoRow label="區域" value={client.distAlt} />
                   <InfoRow label="里" value={client.villAlt} />
                   <InfoRow label="地址" value={client.addrAlt} />

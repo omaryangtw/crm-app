@@ -38,6 +38,7 @@ import type { FilterConfig, ActiveFilter } from "@/app/_lib/filters/filter-confi
 interface ClientRow {
   id: number;
   name: string | null;
+  isDead: boolean;
   sex: string | null;
   phone: string | null;
   phoneAlt: string | null;
@@ -121,9 +122,10 @@ const columns: ColumnDef<ClientRow>[] = [
     cell: ({ row }) => (
       <Link
         href={`/clients/${row.original.id}`}
-        className="text-primary hover:underline"
+        className={row.original.isDead ? "text-destructive hover:underline" : "text-primary hover:underline"}
       >
         {row.original.name ?? "—"}
+        {row.original.isDead && <span className="ml-1 text-xs">(歿)</span>}
       </Link>
     ),
   },
@@ -269,9 +271,12 @@ export function ClientTable({ clients, searchQuery, pagination, filterConfig, ac
             const phone = r.mobile || r.phone || null;
             return (
               <Link key={r.id} href={`/clients/${r.id}`} className="block">
-                <div className="rounded-md border border-border bg-card p-3 hover:bg-muted/50 transition-colors">
+                <div className={`rounded-md border bg-card p-3 hover:bg-muted/50 transition-colors ${r.isDead ? "border-destructive/30 opacity-75" : "border-border"}`}>
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{r.name ?? "未命名"}</span>
+                    <span className={`font-medium ${r.isDead ? "text-destructive" : ""}`}>
+                      {r.name ?? "未命名"}
+                      {r.isDead && <span className="ml-1 text-xs">(歿)</span>}
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       {r.sex ? (SEX_LABELS[r.sex] ?? r.sex) : ""}
                     </span>

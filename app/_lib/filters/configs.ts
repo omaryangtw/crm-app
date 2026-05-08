@@ -12,6 +12,7 @@ export const clientFilterConfig: FilterConfig = [
   { type: "enum", field: "sex", label: "性別", options: SEX_LABELS },
   { type: "enum", field: "indigenousGroup", label: "族別", options: INDIGENOUS_GROUP_LABELS },
   { type: "enum", field: "plainMountain", label: "平/山", options: PLAIN_MOUNTAIN_LABELS },
+  { type: "boolean", field: "isDead", label: "已歿", trueLabel: "已歿", falseLabel: "存活" },
 ];
 
 export const caseFilterConfig: FilterConfig = [
