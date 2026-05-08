@@ -53,7 +53,8 @@ function formatExportValue(key: string, value: unknown): unknown {
  * Admin-only — returns "權限不足" for unauthorized users.
  */
 export async function exportClients(
-  criteria: ExportCriteria
+  criteria: ExportCriteria,
+  options?: { preview?: boolean },
 ): Promise<ActionResult<Record<string, unknown>[]>> {
   const session = await auth();
   if (!session?.user || session.user.role !== "admin") {
@@ -104,21 +105,23 @@ export async function exportClients(
 
     const userId = parseInt(session.user.id ?? "0", 10);
     const userEmail = session.user.email ?? "";
-    await createAuditLogEntry({
-      entityType: "Export",
-      entityId: 0,
-      action: "EXPORT",
-      userId,
-      userEmail,
-      oldData: null,
-      newData: {
-        type: "custom",
-        filters: query,
-        columns: selectedColumns,
-        resultCount: formatted.length,
-      },
-      changedFields: [],
-    });
+    if (!options?.preview) {
+      await createAuditLogEntry({
+        entityType: "Export",
+        entityId: 0,
+        action: "EXPORT",
+        userId,
+        userEmail,
+        oldData: null,
+        newData: {
+          type: "custom",
+          filters: query,
+          columns: selectedColumns,
+          resultCount: formatted.length,
+        },
+        changedFields: [],
+      });
+    }
 
     return {
       success: true,

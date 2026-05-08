@@ -580,7 +580,7 @@ function ExportSection() {
     setError(null);
     setPreviewData(null);
     try {
-      const result = await exportClients({ query, attributes: attrs });
+      const result = await exportClients({ query, attributes: attrs }, { preview: true });
       if (!result.success) {
         setError(result.error);
         return;
