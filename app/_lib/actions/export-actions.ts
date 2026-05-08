@@ -8,6 +8,46 @@ import { createAuditLogEntry } from "../audit/audit-service";
 import type { ExportCriteria } from "../schemas/export-schema";
 import type { ActionResult } from "./auth-actions";
 
+// ── Export formatting helpers ──
+
+const COLUMN_LABELS: Record<string, string> = {
+  name: "姓名", nameAlt: "別名", idn: "身分證字號", sex: "性別",
+  birthday: "生日", isDead: "已歿", householdAdmin: "戶長",
+  incomeStatus: "收入狀態", disabledStatus: "身障狀態",
+  indigenousGroup: "族別", tribe: "部落", plainMountain: "平原/山原",
+  canCall: "可電聯", phone: "電話", phoneNote: "電話備註",
+  phoneAlt: "電話(備)", phoneAltNote: "電話(備)備註",
+  mobile: "手機", mobileNote: "手機備註",
+  mobileAlt: "手機(備)", mobileAltNote: "手機(備)備註",
+  canMail: "可郵寄", city: "縣市", cityAlt: "縣市(備)",
+  dist: "區", distAlt: "區(備)", vill: "里", villAlt: "里(備)",
+  addr: "地址", addrAlt: "地址(備)", addrNote: "地址備註",
+  addrAltNote: "地址(備)備註", note: "備註",
+};
+
+const SEX_MAP: Record<string, string> = { male: "男", female: "女" };
+const INCOME_MAP: Record<string, string> = { low: "低收", "mid-low": "中低收", "mid-low-elderly": "中低老", mid_low: "中低收", mid_low_elderly: "中低老" };
+const DISABLED_MAP: Record<string, string> = { light: "輕度", mid: "中度", heavy: "重度" };
+const GROUP_MAP: Record<string, string> = {
+  amis: "阿美", atayal: "泰雅", bunun: "布農", kanakanavu: "卡那卡那富",
+  kavalan: "噶瑪蘭", paiwan: "排灣", puyuma: "卑南", rukai: "魯凱",
+  hla_alua: "拉阿魯哇", saisiyat: "賽夏", sakizaya: "撒奇萊雅",
+  seediq: "賽德克", truku: "太魯閣", thao: "邵", tsou: "鄒", yami: "雅美",
+};
+const PLAIN_MAP: Record<string, string> = { plain: "平原", mountain: "山原" };
+
+function formatExportValue(key: string, value: unknown): unknown {
+  if (value === null || value === undefined) return "";
+  if (value instanceof Date) return value.toISOString().split("T")[0];
+  if (typeof value === "boolean") return value ? "是" : "否";
+  if (key === "sex") return SEX_MAP[value as string] ?? value;
+  if (key === "incomeStatus") return INCOME_MAP[value as string] ?? value;
+  if (key === "disabledStatus") return DISABLED_MAP[value as string] ?? value;
+  if (key === "indigenousGroup") return GROUP_MAP[value as string] ?? value;
+  if (key === "plainMountain") return PLAIN_MAP[value as string] ?? value;
+  return value;
+}
+
 /**
  * Export clients based on filter criteria.
  * Admin-only — returns "權限不足" for unauthorized users.
@@ -51,6 +91,17 @@ export async function exportClients(
       select,
     });
 
+    // Format data for export: Chinese headers, ISO dates, Chinese enum values
+    const formatted = clients.map((row) => {
+      const out: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(row)) {
+        if (key === "id") { out["ID"] = value; continue; }
+        const label = COLUMN_LABELS[key] ?? key;
+        out[label] = formatExportValue(key, value);
+      }
+      return out;
+    });
+
     const userId = parseInt(session.user.id ?? "0", 10);
     const userEmail = session.user.email ?? "";
     await createAuditLogEntry({
@@ -64,14 +115,14 @@ export async function exportClients(
         type: "custom",
         filters: query,
         columns: selectedColumns,
-        resultCount: clients.length,
+        resultCount: formatted.length,
       },
       changedFields: [],
     });
 
     return {
       success: true,
-      data: clients as unknown as Record<string, unknown>[],
+      data: formatted,
     };
   } catch {
     return { success: false, error: "匯出失敗，請稍後再試" };
