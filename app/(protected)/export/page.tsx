@@ -435,19 +435,19 @@ function StaffMigrationSection() {
   return (
     <Card className="mt-4">
       <CardHeader>
-        <CardTitle>員工綁定</CardTitle>
+        <CardTitle>員工連結</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          從案件與通聯的承辦人欄位自動建立員工資料並綁定。此操作會重建所有員工記錄。
+          從案件與通聯的承辦人欄位自動建立員工資料並連結。此操作會重建所有員工記錄。
         </p>
         <Button onClick={handleRun} disabled={running} variant="outline">
-          {running ? "執行中..." : "執行員工綁定"}
+          {running ? "執行中..." : "執行員工連結"}
         </Button>
         {result && result.success && (
           <div className="rounded-md bg-muted p-3 text-sm space-y-1">
             <p>建立 {result.staffCreated} 位員工</p>
-            <p>案件綁定 {result.caseLinks} 筆、通聯綁定 {result.contactLinks} 筆</p>
+            <p>案件連結 {result.caseLinks} 筆、通聯連結 {result.contactLinks} 筆</p>
             {result.unresolved.length > 0 && (
               <p className="text-muted-foreground">
                 無法解析：{result.unresolved.join("、")}

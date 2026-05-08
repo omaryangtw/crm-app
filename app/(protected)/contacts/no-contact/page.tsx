@@ -36,7 +36,7 @@ export default async function NoContactPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="text-xl font-semibold mb-4">從未成功聯繫</h1>
+      <h1 className="text-xl font-semibold mb-4">從未成功聯絡</h1>
       <p className="text-sm text-muted-foreground mb-4">
         共 {rows.length} 位族人（平原、存活、無成功通聯紀錄）
       </p>
@@ -47,7 +47,7 @@ export default async function NoContactPage() {
             <tr>
               <th className="px-4 py-3 text-left font-medium text-muted-foreground">姓名</th>
               <th className="px-4 py-3 text-left font-medium text-muted-foreground">生日</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">成功聯繫次數</th>
+              <th className="px-4 py-3 text-left font-medium text-muted-foreground">成功聯絡次數</th>
               <th className="px-4 py-3 text-left font-medium text-muted-foreground">建立日期</th>
             </tr>
           </thead>

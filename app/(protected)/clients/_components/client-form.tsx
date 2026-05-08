@@ -243,7 +243,7 @@ export default function ClientForm({ defaultValues, onSubmitAction, submitLabel,
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="mb-2">
-            <CheckboxField id="canCall" label="可聯繫電話" registration={register("canCall")} />
+            <CheckboxField id="canCall" label="可聯絡電話" registration={register("canCall")} />
           </div>
           <FormGrid columns="2">
             <div>

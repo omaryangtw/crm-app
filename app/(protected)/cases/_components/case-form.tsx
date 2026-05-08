@@ -34,7 +34,7 @@ interface CaseFormProps {
   submitLabel: string;
   /** Pre-filled clientId (for create from client detail) */
   clientId?: number;
-  /** 當前登入使用者綁定的 staffId，用於新增時自動預填 */
+  /** 當前登入使用者連結的 staffId，用於新增時自動預填 */
   sessionStaffId?: number | null;
   /** Enable draft auto-save (only for create mode) */
   enableDraft?: boolean;

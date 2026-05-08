@@ -29,7 +29,7 @@ export default function AutoBindBanner({
           setResult(res);
           router.refresh();
         } else {
-          setError(res.error ?? "自動綁定失敗");
+          setError(res.error ?? "自動連結失敗");
         }
       } catch {
         setError("系統錯誤，請稍後再試");
@@ -41,20 +41,20 @@ export default function AutoBindBanner({
     <div className="rounded-md border border-border bg-muted px-4 py-3">
       {result ? (
         <p className="text-sm text-muted-foreground">
-          自動綁定完成：成功 {result.bound} 筆、跳過 {result.skipped} 筆
+          自動連結完成：成功 {result.bound} 筆、跳過 {result.skipped} 筆
         </p>
       ) : (
         <div className="flex items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
             偵測到 {candidateCount} 筆 email 相符的 Staff-User
-            配對可自動綁定
+            配對可自動連結
           </p>
           <Button
             size="sm"
             disabled={isPending}
             onClick={handleAutoBind}
           >
-            {isPending ? "處理中…" : "自動綁定"}
+            {isPending ? "處理中…" : "自動連結"}
           </Button>
         </div>
       )}

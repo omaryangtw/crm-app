@@ -54,9 +54,9 @@ export default async function RecentContactsPage() {
 
   return (
     <PageContainer>
-      <PageHeader title="久未聯繫" />
+      <PageHeader title="久未聯絡" />
       <p className="text-sm text-muted-foreground mb-4">
-        共 {rows.length} 位族人（平原、可聯繫、有成功通聯紀錄）
+        共 {rows.length} 位族人（平原、可聯絡、有成功通聯紀錄）
       </p>
 
       <div className="overflow-x-auto rounded-md border border-border">
@@ -70,7 +70,7 @@ export default async function RecentContactsPage() {
                 生日
               </th>
               <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                最近成功聯繫日期
+                最近成功聯絡日期
               </th>
             </tr>
           </thead>

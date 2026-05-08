@@ -30,7 +30,7 @@ export async function bindStaffUser(
     select: { staffId: true },
   });
   if (user?.staffId !== null && user?.staffId !== undefined) {
-    return { success: false, error: "此帳號已綁定其他員工" };
+    return { success: false, error: "此帳號已連結其他員工" };
   }
 
   // Check the Staff is not already bound by another User
@@ -39,7 +39,7 @@ export async function bindStaffUser(
     select: { id: true },
   });
   if (existingBinding) {
-    return { success: false, error: "此員工已被其他帳號綁定" };
+    return { success: false, error: "此員工已被其他帳號連結" };
   }
 
   try {
@@ -52,7 +52,7 @@ export async function bindStaffUser(
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === "P2002"
     ) {
-      return { success: false, error: "此員工已被其他帳號綁定" };
+      return { success: false, error: "此員工已被其他帳號連結" };
     }
     return { success: false, error: "系統錯誤，請稍後再試" };
   }
@@ -72,7 +72,7 @@ export async function unbindStaffUser(
     select: { id: true },
   });
   if (!boundUser) {
-    return { success: false, error: "此員工尚未綁定帳號" };
+    return { success: false, error: "此員工尚未連結帳號" };
   }
 
   await prisma.user.update({

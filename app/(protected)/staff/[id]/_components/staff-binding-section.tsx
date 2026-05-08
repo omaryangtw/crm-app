@@ -81,7 +81,7 @@ export default function StaffBindingSection({
     startTransition(async () => {
       const result = await unbindStaffUser(staffId);
       if (result.success) {
-        setMessage({ type: "success", text: "已成功解除綁定" });
+        setMessage({ type: "success", text: "已成功解除連結" });
         router.refresh();
       } else {
         setMessage({ type: "error", text: result.error ?? "操作失敗" });
@@ -94,7 +94,7 @@ export default function StaffBindingSection({
     startTransition(async () => {
       const result = await bindStaffUser(staffId, selectedUser.id);
       if (result.success) {
-        setMessage({ type: "success", text: "已成功綁定帳號" });
+        setMessage({ type: "success", text: "已成功連結帳號" });
         setSelectedUser(null);
         router.refresh();
       } else {
@@ -111,7 +111,7 @@ export default function StaffBindingSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>帳號綁定</CardTitle>
+        <CardTitle>帳號連結</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {boundUser ? (
@@ -120,7 +120,7 @@ export default function StaffBindingSection({
             <div className="flex items-center justify-between">
               <div>
                 <label className="mb-1 block text-sm font-medium">
-                  綁定帳號
+                  連結帳號
                 </label>
                 <p className="text-sm">{boundUser.email}</p>
               </div>
@@ -129,7 +129,7 @@ export default function StaffBindingSection({
                 disabled={isPending}
                 onClick={handleUnbind}
               >
-                {isPending ? "處理中…" : "解除綁定"}
+                {isPending ? "處理中…" : "解除連結"}
               </Button>
             </div>
 
@@ -182,9 +182,9 @@ export default function StaffBindingSection({
           <div className="space-y-3">
             <div>
               <label className="mb-1 block text-sm font-medium">
-                綁定帳號
+                連結帳號
               </label>
-              <p className="text-sm text-muted-foreground">尚未綁定</p>
+              <p className="text-sm text-muted-foreground">尚未連結</p>
             </div>
             <div className="space-y-3">
               <Popover open={open} onOpenChange={setOpen}>
@@ -216,7 +216,7 @@ export default function StaffBindingSection({
                         <CommandEmpty>載入中...</CommandEmpty>
                       )}
                       {!loadingUsers && unboundUsers.length === 0 && (
-                        <CommandEmpty>沒有可綁定的帳號</CommandEmpty>
+                        <CommandEmpty>沒有可連結的帳號</CommandEmpty>
                       )}
                       <CommandGroup>
                         {unboundUsers.map((user) => (
@@ -237,7 +237,7 @@ export default function StaffBindingSection({
                 disabled={!selectedUser || isPending}
                 onClick={handleBind}
               >
-                {isPending ? "處理中…" : "確認綁定"}
+                {isPending ? "處理中…" : "確認連結"}
               </Button>
             </div>
           </div>

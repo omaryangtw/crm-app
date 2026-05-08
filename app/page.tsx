@@ -29,7 +29,7 @@ export default async function Home() {
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <h1 className="text-xl font-semibold">帳號尚未啟用</h1>
           <p className="mt-2 text-muted-foreground">
-            請聯繫管理員將您的帳號綁定至員工資料後即可使用系統。
+            請聯絡管理員將您的帳號連結至員工資料後即可使用系統。
           </p>
         </div>
       </PageContainer>
@@ -111,7 +111,7 @@ export default async function Home() {
           href="/contacts"
         />
         <StatCard
-          title="久未聯繫"
+          title="久未聯絡"
           value={staleCount}
           icon={<AlertTriangle className="h-5 w-5" />}
           href="/contacts/recent"
