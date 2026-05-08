@@ -1089,9 +1089,9 @@ export default function ExportPage() {
 
       {isAdmin ? (
         <Tabs defaultValue="import">
-          <TabsList>
-            <TabsTrigger value="import">匯入</TabsTrigger>
-            <TabsTrigger value="export">匯出</TabsTrigger>
+          <TabsList className="h-10">
+            <TabsTrigger value="import" className="px-6 text-base">匯入</TabsTrigger>
+            <TabsTrigger value="export" className="px-6 text-base">匯出</TabsTrigger>
           </TabsList>
 
           <TabsContent value="import">
