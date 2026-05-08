@@ -6,6 +6,7 @@ import { createFamilyRelation, deleteFamilyRelation } from "@/app/_lib/actions/f
 import { VALID_RELATIONSHIPS } from "@/app/_lib/constants/relationship-map";
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/app/_components/section-card";
+import { FamilyGraph } from "./family-graph";
 import {
   Table,
   TableBody,
@@ -132,8 +133,13 @@ export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
         {familyMembers.length === 0 ? (
           <p className="text-sm text-muted-foreground">尚無家庭關係</p>
         ) : (
-          <Table>
-            <TableHeader>
+          <>
+            {/* Visual relationship map */}
+            <FamilyGraph clientId={clientId} members={familyMembers} />
+
+            {/* Detail table */}
+            <Table>
+              <TableHeader>
               <TableRow>
                 <TableHead>姓名</TableHead>
                 <TableHead>關係</TableHead>
@@ -165,6 +171,7 @@ export function FamilySection({ clientId, familyMembers }: FamilySectionProps) {
               ))}
             </TableBody>
           </Table>
+          </>
         )}
     </SectionCard>
   );
