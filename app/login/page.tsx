@@ -35,8 +35,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
-    router.refresh();
+    // Hard navigation to ensure server components get the new session cookie
+    window.location.href = "/";
   }
 
   return (

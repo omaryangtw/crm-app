@@ -53,8 +53,7 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/");
-    router.refresh();
+    window.location.href = "/";
   }
 
   return (

@@ -4,7 +4,7 @@ export const clientCreateSchema = z.object({
   name: z.string().min(1, "姓名為必填").max(100),
   nameAlt: z.string().max(100).optional().nullable(),
   idn: z.string().max(20).optional().nullable(),
-  sex: z.enum(["male", "female"], { required_error: "性別為必填" }),
+  sex: z.enum(["male", "female"], { message: "性別為必填" }),
   birthday: z.coerce.date().optional().nullable(),
   isDead: z.preprocess((v) => v === "true" || v === "on" || v === true, z.boolean()).default(false),
   householdAdmin: z.preprocess((v) => v === "true" || v === "on" || v === true, z.boolean()).default(false),
