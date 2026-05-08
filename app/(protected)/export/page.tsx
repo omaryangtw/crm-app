@@ -648,61 +648,67 @@ function ExportSection() {
       )}
 
       {/* Preset buttons */}
-      <div className="mb-6">
-        <h2 className="text-sm font-medium text-foreground mb-2">快速匯出</h2>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={() => handlePreset("householdMailing")}
-            disabled={loading}
-            variant="secondary"
-          >
-            平原家戶寄件
-          </Button>
-          <Button
-            onClick={() => handlePreset("smsList")}
-            disabled={loading}
-          >
-            簡訊清單
-          </Button>
-          <Button
-            onClick={() => handlePreset("googleContacts")}
-            disabled={loading}
-            variant="outline"
-          >
-            匯入Google通訊錄
-          </Button>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>快速匯出</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            點擊下方按鈕直接下載常用格式的 CSV 檔案，無需額外設定。
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => handlePreset("householdMailing")}
+              disabled={loading}
+              variant="secondary"
+            >
+              平原家戶寄件
+            </Button>
+            <Button
+              onClick={() => handlePreset("smsList")}
+              disabled={loading}
+            >
+              簡訊清單
+            </Button>
+            <Button
+              onClick={() => handlePreset("googleContacts")}
+              disabled={loading}
+              variant="outline"
+            >
+              匯入 Google 通訊錄
+            </Button>
 
-          {presets.map((preset) => (
-            <span key={preset.name} className="inline-flex items-center gap-1">
-              <Button
-                variant="outline"
-                disabled={loading}
-                onClick={() => handleLoadCustomPreset(preset.name)}
-              >
-                {preset.name}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => deletePreset(preset.name)}
-                aria-label={`刪除預設 ${preset.name}`}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </span>
-          ))}
-        </div>
+            {presets.map((preset) => (
+              <span key={preset.name} className="inline-flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  disabled={loading}
+                  onClick={() => handleLoadCustomPreset(preset.name)}
+                >
+                  {preset.name}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => deletePreset(preset.name)}
+                  aria-label={`刪除預設 ${preset.name}`}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </span>
+            ))}
+          </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mt-2"
-          onClick={handleSaveAsPreset}
-        >
-          儲存為預設
-        </Button>
-      </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSaveAsPreset}
+          >
+            儲存為預設
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Custom export filters */}
       <div className="mb-6 rounded-md border border-border bg-card p-4">
