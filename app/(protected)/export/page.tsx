@@ -699,14 +699,6 @@ function ExportSection() {
               </span>
             ))}
           </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleSaveAsPreset}
-          >
-            儲存為預設
-          </Button>
         </CardContent>
       </Card>
 
@@ -995,7 +987,7 @@ function ExportSection() {
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         <Button
           onClick={handlePreview}
           disabled={loading}
@@ -1009,6 +1001,17 @@ function ExportSection() {
         >
           {loading ? "匯出中..." : "自訂匯出"}
         </Button>
+        <span className="mx-2 text-border">|</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSaveAsPreset}
+        >
+          儲存為預設
+        </Button>
+        <span className="text-xs text-muted-foreground hidden sm:inline">
+          將目前的篩選條件與欄位選擇儲存，下次可從快速匯出直接使用
+        </span>
       </div>
 
       {/* Preview table */}
