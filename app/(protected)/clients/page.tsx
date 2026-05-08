@@ -52,6 +52,11 @@ export default async function ClientsPage({ searchParams }: Props) {
   const hasIsDeadFilter = activeFilters.some((f) => f.field === "isDead");
   const defaultAlive = hasIsDeadFilter ? {} : { isDead: false };
 
+  // Show the default filter as a badge in the filter bar
+  const displayFilters = hasIsDeadFilter
+    ? activeFilters
+    : [...activeFilters, { field: "isDead", value: "false" }];
+
   const andClauses = [searchWhere, filterWhere, { id: { not: 0 } }, defaultAlive].filter(
     (w): w is Record<string, unknown> => w != null && Object.keys(w).length > 0,
   );
@@ -87,7 +92,7 @@ export default async function ClientsPage({ searchParams }: Props) {
         searchQuery={q}
         pagination={{ page, pageSize, total }}
         filterConfig={clientFilterConfig}
-        activeFilters={activeFilters}
+        activeFilters={displayFilters}
       />
     </PageContainer>
   );
