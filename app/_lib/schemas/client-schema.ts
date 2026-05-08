@@ -1,25 +1,38 @@
 import { z } from "zod";
 
+// Helper: convert empty string to undefined (for optional select fields)
+const optionalEnum = <T extends [string, ...string[]]>(values: T) =>
+  z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : v),
+    z.enum(values).optional(),
+  );
+
+// Helper: convert empty string to null (for optional text fields)
+const optionalDate = z.preprocess(
+  (v) => (v === "" || v === null || v === undefined ? undefined : v),
+  z.coerce.date().optional().nullable(),
+);
+
 export const clientCreateSchema = z.object({
   name: z.string().min(1, "姓名為必填").max(100),
   nameAlt: z.string().max(100).optional().nullable(),
   idn: z.string().max(20).optional().nullable(),
-  sex: z.enum(["male", "female"], { message: "性別為必填" }),
-  birthday: z.coerce.date().optional().nullable(),
+  sex: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : v),
+    z.enum(["male", "female"], { message: "性別為必填" }),
+  ),
+  birthday: optionalDate,
   isDead: z.preprocess((v) => v === "true" || v === "on" || v === true, z.boolean()).default(false),
   householdAdmin: z.preprocess((v) => v === "true" || v === "on" || v === true, z.boolean()).default(false),
-  incomeStatus: z.enum(["low", "mid_low", "mid_low_elderly"]).optional().nullable(),
-  disabledStatus: z.enum(["light", "mid", "heavy"]).optional().nullable(),
-  indigenousGroup: z
-    .enum([
-      "amis", "atayal", "bunun", "kanakanavu", "kavalan", "paiwan",
-      "puyuma", "rukai", "hla_alua", "saisiyat", "sakizaya", "seediq",
-      "truku", "thao", "tsou", "yami",
-    ])
-    .optional()
-    .nullable(),
+  incomeStatus: optionalEnum(["low", "mid_low", "mid_low_elderly"]),
+  disabledStatus: optionalEnum(["light", "mid", "heavy"]),
+  indigenousGroup: optionalEnum([
+    "amis", "atayal", "bunun", "kanakanavu", "kavalan", "paiwan",
+    "puyuma", "rukai", "hla_alua", "saisiyat", "sakizaya", "seediq",
+    "truku", "thao", "tsou", "yami",
+  ]),
   tribe: z.string().max(100).optional().nullable(),
-  plainMountain: z.enum(["plain", "mountain"]).optional().nullable(),
+  plainMountain: optionalEnum(["plain", "mountain"]),
   canCall: z.preprocess((v) => v === "true" || v === "on" || v === true, z.boolean()).default(true),
   phone: z.string().max(20).optional().nullable(),
   phoneNote: z.string().max(200).optional().nullable(),
