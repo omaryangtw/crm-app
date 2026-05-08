@@ -471,6 +471,7 @@ function ExportSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [auditLogs, setAuditLogs] = useState<ExportAuditEntry[]>([]);
+  const [previewData, setPreviewData] = useState<Record<string, unknown>[] | null>(null);
 
   const loadAuditLogs = useCallback(async () => {
     const logs = await getExportAuditLogs();
@@ -564,6 +565,43 @@ function ExportSection() {
       return;
     }
     await handleExport({ query, attributes: attrs }, "export.csv");
+  }
+
+  async function handlePreview() {
+    const attrs: Record<string, boolean> = {};
+    for (const [k, v] of Object.entries(selectedColumns)) {
+      if (v) attrs[k] = true;
+    }
+    if (Object.keys(attrs).length === 0) {
+      setError("請至少選擇一個欄位");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setPreviewData(null);
+    try {
+      const result = await exportClients({ query, attributes: attrs });
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      if (result.data.length === 0) {
+        setError("查無符合條件的資料");
+        return;
+      }
+      setPreviewData(result.data);
+    } catch {
+      setError("預覽失敗，請稍後再試");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleDownloadPreview() {
+    if (previewData) {
+      downloadCsv(previewData, "export.csv");
+      void loadAuditLogs();
+    }
   }
 
   async function handlePreset(preset: "householdMailing" | "smsList" | "googleContacts") {
@@ -951,12 +989,57 @@ function ExportSection() {
         </div>
       </div>
 
-      <Button
-        onClick={handleCustomExport}
-        disabled={loading}
-      >
-        {loading ? "匯出中..." : "自訂匯出"}
-      </Button>
+      <div className="flex gap-2">
+        <Button
+          onClick={handlePreview}
+          disabled={loading}
+          variant="outline"
+        >
+          {loading ? "載入中..." : "預覽"}
+        </Button>
+        <Button
+          onClick={handleCustomExport}
+          disabled={loading}
+        >
+          {loading ? "匯出中..." : "自訂匯出"}
+        </Button>
+      </div>
+
+      {/* Preview table */}
+      {previewData && (
+        <div className="mt-4 rounded-md border border-border bg-card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-medium text-foreground">
+              預覽（共 {previewData.length} 筆，顯示前 5 筆）
+            </h2>
+            <Button size="sm" onClick={handleDownloadPreview}>
+              下載全部 CSV
+            </Button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left text-muted-foreground">
+                  {Object.keys(previewData[0] ?? {}).map((col) => (
+                    <th key={col} className="pb-2 pr-4 font-medium whitespace-nowrap">{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {previewData.slice(0, 5).map((row, i) => (
+                  <tr key={i} className="border-b border-border last:border-0">
+                    {Object.values(row).map((val, j) => (
+                      <td key={j} className="py-2 pr-4 whitespace-nowrap">
+                        {val == null ? "—" : String(val)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Export audit history */}
       {auditLogs.length > 0 && (

@@ -258,12 +258,48 @@ export function ClientTable({ clients, searchQuery, pagination, filterConfig, ac
       {filterConfig && (
         <FilterBar config={filterConfig} activeFilters={activeFilters ?? []} />
       )}
-      <DataTable
-        table={table}
-        columns={columns}
-        emptyState={emptyState}
-        pagination={pagination}
-      />
+
+      {/* Mobile card view */}
+      <div className="sm:hidden space-y-2">
+        {table.getRowModel().rows.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">無資料</div>
+        ) : (
+          table.getRowModel().rows.map((row) => {
+            const r = row.original;
+            const phone = r.mobile || r.phone || null;
+            return (
+              <Link key={r.id} href={`/clients/${r.id}`} className="block">
+                <div className="rounded-md border border-border bg-card p-3 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{r.name ?? "未命名"}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {r.sex ? (SEX_LABELS[r.sex] ?? r.sex) : ""}
+                    </span>
+                  </div>
+                  {phone && (
+                    <div className="text-sm text-muted-foreground mt-1">{phone}</div>
+                  )}
+                  {(r.dist || r.vill) && (
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {[r.city, r.dist, r.vill].filter(Boolean).join(" ")}
+                    </div>
+                  )}
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop table view */}
+      <div className="hidden sm:block">
+        <DataTable
+          table={table}
+          columns={columns}
+          emptyState={emptyState}
+          pagination={pagination}
+        />
+      </div>
     </div>
   );
 }
