@@ -272,7 +272,11 @@ export default async function ClientDetailPage({ params }: Props) {
                 <TableBody>
                   {client.cases.map((c) => (
                     <TableRow key={c.id}>
-                      <TableCell>{c.name ?? "-"}</TableCell>
+                      <TableCell>
+                        <Link href={`/cases/${c.id}`} className="text-primary hover:underline">
+                          {c.name ?? "-"}
+                        </Link>
+                      </TableCell>
                       <TableCell>
                         {c.status ? (
                           <Badge variant={c.status === "in_progress" ? "default" : "secondary"}>

@@ -89,7 +89,9 @@ export function ContactsSection({
             {contacts.map((ct) => (
               <TableRow key={ct.id}>
                 <TableCell>
-                  {ct.date ? format(ct.date, "yyyy-MM-dd") : "-"}
+                  <Link href={`/contacts/${ct.id}`} className="text-primary hover:underline">
+                    {ct.date ? format(ct.date, "yyyy-MM-dd") : "-"}
+                  </Link>
                 </TableCell>
                 <TableCell>
                   {ct.contactType
