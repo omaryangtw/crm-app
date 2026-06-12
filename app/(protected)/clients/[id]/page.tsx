@@ -76,8 +76,9 @@ export default async function ClientDetailPage({ params }: Props) {
 
   const birthday = computeBirthdayFields(client.birthday);
 
-  // Merge family relations from both directions
-  const familyMembers = [
+  // Merge family relations from both directions, dedupe by counterpart personId
+  // (legacy data may contain both (A,B) and (B,A) rows pointing to the same person)
+  const familyMembersRaw = [
     ...client.familyRelationsAsA.map((r) => ({
       id: r.id,
       personId: r.personB.id,
@@ -91,6 +92,12 @@ export default async function ClientDetailPage({ params }: Props) {
       relationship: r.relationBToA,
     })),
   ];
+  const seenPersonIds = new Set<number>();
+  const familyMembers = familyMembersRaw.filter((m) => {
+    if (seenPersonIds.has(m.personId)) return false;
+    seenPersonIds.add(m.personId);
+    return true;
+  });
 
   return (
     <PageContainer>

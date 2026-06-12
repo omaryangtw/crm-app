@@ -4,6 +4,7 @@ import { getStaffById } from "@/app/_lib/actions/staff-actions";
 import { auth } from "@/app/_lib/auth";
 import { prisma } from "@/app/_lib/db";
 import { DeactivateStaffButton } from "./deactivate-staff-button";
+import { ActivateStaffButton } from "./activate-staff-button";
 import StaffBindingSection from "./_components/staff-binding-section";
 import { PageContainer } from "@/app/_components/page-container";
 import { PageHeader } from "@/app/_components/page-header";
@@ -54,8 +55,10 @@ export default async function StaffDetailPage({ params }: Props) {
             <Link href={`/staff/${staff.id}/edit`}>
               <Button>編輯</Button>
             </Link>
-            {staff.isActive && (
+            {staff.isActive ? (
               <DeactivateStaffButton staffId={staff.id} staffName={staff.name} />
+            ) : (
+              <ActivateStaffButton staffId={staff.id} staffName={staff.name} />
             )}
           </div>
         }

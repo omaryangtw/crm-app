@@ -35,6 +35,15 @@ export async function createFamilyRelation(
 
   const inverse = getInverseRelationship(relationship, sourceClient.sex);
 
+  // Check inverse direction to prevent duplicate (B,A) when (A,B) exists
+  const existingInverse = await prisma.familyRelation.findFirst({
+    where: { personAId: targetId, personBId: sourceId },
+    select: { id: true },
+  });
+  if (existingInverse) {
+    return { success: false, error: "此家庭關係已存在" };
+  }
+
   try {
     // Single row stores both directions: A→B and B→A
     const record = await prisma.familyRelation.create({

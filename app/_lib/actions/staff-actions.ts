@@ -112,6 +112,28 @@ export async function deactivateStaff(
   }
 }
 
+export async function activateStaff(
+  id: number
+): Promise<ActionResult<null>> {
+  const session = await auth();
+  if (!session) return { success: false, error: "請先登入" };
+
+  try {
+    await prisma.staff.update({
+      where: { id },
+      data: { isActive: true },
+    });
+    revalidatePath("/staff");
+    return { success: true, data: null };
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === "P2025")
+        return { success: false, error: "找不到員工資料" };
+    }
+    return { success: false, error: "系統錯誤，請稍後再試" };
+  }
+}
+
 export async function getActiveStaff(): Promise<{ id: number; name: string; aliases: string[] }[]> {
   const session = await auth();
   if (!session) return [];
