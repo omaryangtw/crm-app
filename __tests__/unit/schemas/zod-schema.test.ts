@@ -19,7 +19,7 @@ describe("Feature: crm-modernization, Property 17: Zod schema validation", () =>
   const validIndigenousGroup = [
     "amis", "atayal", "bunun", "kanakanavu", "kavalan", "paiwan",
     "puyuma", "rukai", "hla_alua", "saisiyat", "sakizaya", "seediq",
-    "truku", "thao", "tsou", "yami",
+    "truku", "thao", "tsou", "yami", "pingpu",
   ] as const;
   const validPlainMountain = ["plain", "mountain"] as const;
   const validCaseStatus = ["in_progress", "closed"] as const;

@@ -35,6 +35,7 @@ export const INDIGENOUS_GROUP_LABELS: Record<string, string> = {
   thao: "邵",
   tsou: "鄒",
   yami: "雅美",
+  pingpu: "平埔族群",
 };
 
 export const PLAIN_MOUNTAIN_LABELS: Record<string, string> = {

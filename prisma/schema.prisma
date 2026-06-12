@@ -41,6 +41,7 @@ enum IndigenousGroup {
   thao       @map("邵")
   tsou       @map("鄒")
   yami       @map("雅美")
+  pingpu     @map("平埔族群")
 }
 
 enum PlainMountain {

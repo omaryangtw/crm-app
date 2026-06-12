@@ -76,6 +76,7 @@ const GROUP_OPTIONS = [
   { value: "thao", label: "邵" },
   { value: "tsou", label: "鄒" },
   { value: "yami", label: "雅美" },
+  { value: "pingpu", label: "平埔族群" },
 ];
 
 const IMPORT_TABLES = [

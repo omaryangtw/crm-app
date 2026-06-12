@@ -29,7 +29,7 @@ export const clientCreateSchema = z.object({
   indigenousGroup: optionalEnum([
     "amis", "atayal", "bunun", "kanakanavu", "kavalan", "paiwan",
     "puyuma", "rukai", "hla_alua", "saisiyat", "sakizaya", "seediq",
-    "truku", "thao", "tsou", "yami",
+    "truku", "thao", "tsou", "yami", "pingpu",
   ]),
   tribe: z.string().max(100).optional().nullable(),
   plainMountain: optionalEnum(["plain", "mountain"]),
