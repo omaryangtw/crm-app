@@ -12,8 +12,8 @@ services:
       - BACKUP_DIR=/app/backups
       - ADMIN_DEFAULT_PASSWORD=${ADMIN_DEFAULT_PASSWORD:-changeme}
     volumes:
-      - backup-data:/app/backups
-      - pdf-files:/app/public/files
+      - ./backups:/app/backups
+      - uploads:/app/public/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -35,5 +35,4 @@ services:
 
 volumes:
   pg-data:
-  backup-data:
-  pdf-files:
+  uploads:

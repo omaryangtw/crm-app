@@ -22,9 +22,14 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Next.js standalone output
-COPY --from=build /app/public ./public
+COPY --from=build --chown=nextjs:nodejs /app/public ./public
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Ensure upload target dir exists and is writable by the runtime user
+# (the named volume mounted here will inherit this ownership on first creation)
+RUN mkdir -p ./public/uploads/photos \
+    && chown -R nextjs:nodejs ./public/uploads
 
 # Prisma: full node_modules needed for `prisma migrate deploy`
 COPY --from=build /app/node_modules ./node_modules
