@@ -2,7 +2,16 @@ import { z } from "zod";
 
 export const staffCreateSchema = z.object({
   name: z.string().trim().min(1, { error: "姓名為必填" }),
-  aliases: z.array(z.string().trim()).optional().default([]),
+  aliases: z.preprocess(
+    (v) => {
+      if (Array.isArray(v)) return v;
+      if (typeof v === "string") {
+        return v.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+      return [];
+    },
+    z.array(z.string().trim()).default([]),
+  ),
   email: z
     .string()
     .trim()
