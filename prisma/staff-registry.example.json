@@ -1,0 +1,11 @@
+{
+  "_comment": "Copy this file to staff-registry.json and fill in real data. staff-registry.json is gitignored because it contains real staff names (PII). 'corrections' maps legacy typos/shortnames/aliases to a canonical name. 'registry' lists canonical staff with their aliases.",
+  "corrections": {
+    "Typo": "CanonicalName",
+    "Shortname": "CanonicalName"
+  },
+  "registry": [
+    { "name": "CanonicalName", "aliases": ["Alias1", "Alias2"] },
+    { "name": "AnotherStaff", "aliases": [] }
+  ]
+}

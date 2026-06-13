@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { filterStaff, getActiveOnly, type StaffRecord } from "./staff-utils";
 
 const staff: StaffRecord[] = [
-  { id: 1, name: "Alice Wang", aliases: ["AliasA"], email: "alice@example.com", phone: "0912345678", isActive: true },
+  { id: 1, name: "Alice Wang", aliases: ["Malo"], email: "alice@example.com", phone: "0912345678", isActive: true },
   { id: 2, name: "Bob Chen", aliases: [], email: "bob@example.com", phone: null, isActive: false },
   { id: 3, name: "Charlie Li", aliases: ["Fox", "小李"], email: null, phone: "0987654321", isActive: true },
 ];
@@ -27,7 +27,7 @@ describe("filterStaff", () => {
   });
 
   it("matches aliases case-insensitively", () => {
-    expect(filterStaff(staff, "nakaw")).toEqual([staff[0]]);
+    expect(filterStaff(staff, "malo")).toEqual([staff[0]]);
     expect(filterStaff(staff, "Fox")).toEqual([staff[2]]);
     expect(filterStaff(staff, "小李")).toEqual([staff[2]]);
   });

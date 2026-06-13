@@ -21,51 +21,15 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { loadStaffRegistry } from "./staff-registry-loader";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL!,
 });
 const prisma = new PrismaClient({ adapter });
 
-// ── Typo / shortname corrections ──
-const CORRECTIONS: Record<string, string> = {
-  "AliasA": "AliasA",
-  "AliasB": "AliasB",
-  "AliasB": "AliasB",
-  "Ingay": "Ingay",
-  "AliasC": "AliasC",
-  "StaffA": "StaffA",
-  "StaffB": "StaffB",
-  "StaffF": "StaffF",
-  "StaffC": "StaffC",
-  "StaffE": "StaffE",
-  "StaffG": "StaffG",
-  "StaffD": "StaffD",
-  "Ingay": "Ingay",
-  "IngayIngay": "Ingay",
-};
-
-// ── Canonical staff registry ──
-const STAFF_REGISTRY: { name: string; aliases: string[] }[] = [
-  { name: "StaffA", aliases: ["AliasA"] },
-  { name: "Fali", aliases: [] },
-  { name: "StaffL", aliases: [] },
-  { name: "Ingay", aliases: [] },
-  { name: "AliasB", aliases: [] },
-  { name: "StaffB", aliases: [] },
-  { name: "StaffC", aliases: ["AliasD"] },
-  { name: "StaffD", aliases: ["AliasC"] },
-  { name: "StaffE", aliases: ["Fox"] },
-  { name: "StaffK", aliases: [] },
-  { name: "StaffF", aliases: [] },
-  { name: "StaffG", aliases: [] },
-  { name: "特助", aliases: [] },
-  { name: "StaffH", aliases: [] },
-  { name: "StaffI", aliases: [] },
-  { name: "StaffTeam", aliases: [] },
-  { name: "StaffM", aliases: [] },
-  { name: "StaffJ", aliases: [] },
-];
+// Staff registry / corrections loaded from gitignored config (contains real names / PII)
+const { corrections: CORRECTIONS, registry: STAFF_REGISTRY } = loadStaffRegistry();
 
 // ── Build lookup map: name/alias → canonical name (case-insensitive) ──
 function buildLookupMap(): Map<string, string> {
@@ -81,8 +45,8 @@ function buildLookupMap(): Map<string, string> {
 
 /**
  * Split a multi-value person_in_charge string into individual names.
- * Handles: / ／ 、 , . 2+ spaces, parentheses like "Ingay (nakaw)",
- * and mixed CJK/Latin like "StaffE AliasA" or "AliasA StaffE".
+ * Handles: / ／ 、 , . 2+ spaces, parentheses like "Allen (alben)",
+ * and mixed CJK/Latin like "陳大文 Allen" or "Allen 大文".
  */
 export function parseNames(raw: string): string[] {
   const trimmedRaw = raw.trim();
@@ -92,7 +56,7 @@ export function parseNames(raw: string): string[] {
   let normalized = trimmedRaw.replace(/[()（）]/g, "/");
 
   // Insert delimiter between CJK and Latin (single space boundary)
-  // "StaffE AliasA" → "StaffE/AliasA", "AliasA StaffE" → "AliasA/StaffE"
+  // "陳大文 Allen" → "陳大文/Allen", "Allen 大文" → "Allen/大文"
   normalized = normalized.replace(
     /([\u4e00-\u9fff])\s+([A-Za-z])/g,
     "$1/$2"
@@ -103,7 +67,7 @@ export function parseNames(raw: string): string[] {
   );
 
   // Insert delimiter between two capitalized Latin words separated by space
-  // "Ingay AliasA" → "Ingay/AliasA", "Fox AliasA" → "Fox/AliasA"
+  // "Allen Bob" → "Allen/Bob", "Fox Bob" → "Fox/Bob"
   normalized = normalized.replace(
     /([A-Za-z])\s+([A-Z])/g,
     "$1/$2"

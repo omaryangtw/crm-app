@@ -47,3 +47,6 @@ public/uploads/photos/*
 
 # backup data
 /backups/
+
+# staff registry (contains real staff names / PII)
+prisma/staff-registry.json

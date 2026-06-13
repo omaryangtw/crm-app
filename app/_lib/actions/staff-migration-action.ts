@@ -2,37 +2,10 @@
 
 import { prisma } from "../db";
 import { auth } from "../auth";
+import { loadStaffRegistry } from "../../../prisma/staff-registry-loader";
 
-// ── Typo / shortname corrections ──
-const CORRECTIONS: Record<string, string> = {
-  "AliasA": "AliasA", "AliasB": "AliasB", "AliasB": "AliasB",
-  "Ingay": "Ingay", "AliasC": "AliasC", "StaffA": "StaffA",
-  "StaffB": "StaffB", "StaffF": "StaffF", "StaffC": "StaffC",
-  "StaffE": "StaffE", "StaffG": "StaffG", "StaffD": "StaffD",
-  "Ingay": "Ingay", "IngayIngay": "Ingay",
-};
-
-// ── Canonical staff registry ──
-const STAFF_REGISTRY: { name: string; aliases: string[] }[] = [
-  { name: "StaffA", aliases: ["AliasA"] },
-  { name: "Fali", aliases: [] },
-  { name: "StaffL", aliases: [] },
-  { name: "Ingay", aliases: [] },
-  { name: "AliasB", aliases: [] },
-  { name: "StaffB", aliases: [] },
-  { name: "StaffC", aliases: ["AliasD"] },
-  { name: "StaffD", aliases: ["AliasC"] },
-  { name: "StaffE", aliases: ["Fox"] },
-  { name: "StaffK", aliases: [] },
-  { name: "StaffF", aliases: [] },
-  { name: "StaffG", aliases: [] },
-  { name: "特助", aliases: [] },
-  { name: "StaffH", aliases: [] },
-  { name: "StaffI", aliases: [] },
-  { name: "StaffTeam", aliases: [] },
-  { name: "StaffM", aliases: [] },
-  { name: "StaffJ", aliases: [] },
-];
+// Staff registry / corrections loaded from gitignored config (contains real names / PII)
+const { corrections: CORRECTIONS, registry: STAFF_REGISTRY } = loadStaffRegistry();
 
 function buildLookupMap(): Map<string, string> {
   const map = new Map<string, string>();

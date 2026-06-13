@@ -135,7 +135,7 @@ export default function StaffForm({
               <Input
                 id="aliases"
                 type="text"
-                placeholder="以逗號分隔，例如：AliasA, StaffA"
+                placeholder="以逗號分隔，例如：Ali, 小明"
                 {...register("aliases")}
               />
             </div>
