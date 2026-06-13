@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/app/_lib/db";
+import { auth } from "@/app/_lib/auth";
 import { Button } from "@/components/ui/button";
 
 interface Props {
@@ -6,6 +8,10 @@ interface Props {
 }
 
 export default async function PerformancePage({ searchParams }: Props) {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  if (session.user.role !== "admin") redirect("/");
+
   const params = await searchParams;
   const now = new Date();
   const year = params.year ? parseInt(params.year, 10) : now.getFullYear();

@@ -16,7 +16,6 @@ import {
   Users,
   FileText,
   Phone,
-  BarChart3,
   Settings,
   ChevronDown,
   type LucideIcon,
@@ -64,18 +63,13 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/contacts/weekly", label: "近期通聯" },
     ],
   },
-  {
-    type: "group",
-    label: "報表",
-    icon: BarChart3,
-    children: [{ href: "/performance", label: "績效" }],
-  },
 ];
 
 const ADMIN_GROUP: NavGroup = {
   label: "管理",
   icon: Settings,
   children: [
+    { href: "/performance", label: "績效報表" },
     { href: "/export", label: "匯入/匯出" },
     { href: "/staff", label: "員工管理" },
     { href: "/admin/deletion-requests", label: "刪除審核" },
