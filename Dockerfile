@@ -38,6 +38,8 @@ COPY --from=build /app/prisma.config.ts ./prisma.config.ts
 COPY --from=build /app/package.json ./package.json
 
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
+# Strip any CR characters in case the file was checked out with CRLF on Windows
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh
 
 USER nextjs
 
