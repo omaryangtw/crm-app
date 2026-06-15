@@ -44,6 +44,22 @@ export default async function HouseholdCheckPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <h1 className="text-xl font-semibold mb-4">戶長檢查</h1>
+
+      <div className="mb-6 rounded-lg border border-border bg-muted/40 p-4 text-sm text-foreground">
+        <p className="mb-2 font-medium">這個頁面在做什麼？</p>
+        <p className="mb-3 text-muted-foreground">
+          系統會找出「同一個地址、啟用郵寄，但沒有任何一位族人被設為戶長」的情況。
+          寄送紙本郵件時，每個地址需要一位戶長作為收件代表；若整個地址都沒有戶長，
+          郵件可能無法正確寄達，或對同住的多位族人重複寄送。
+        </p>
+        <p className="mb-2 font-medium">發現未設戶長時，怎麼處理？</p>
+        <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
+          <li>點下方清單中的族人姓名，進入該族人的詳情頁。</li>
+          <li>編輯該族人資料，將同住址中應作為收件代表的人勾選為「戶長」。</li>
+          <li>每個地址只需設定一位戶長即可，設定後該地址就會從本清單消失。</li>
+        </ol>
+      </div>
+
       <p className="text-sm text-muted-foreground mb-4">
         以下地址啟用郵寄但未設定戶長，共 {flagged.length} 筆
       </p>
