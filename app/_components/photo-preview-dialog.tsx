@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { photoSrc } from "@/app/_lib/utils/photo-url";
 
 interface PhotoPreviewDialogProps {
   open: boolean;
@@ -34,7 +35,7 @@ export function PhotoPreviewDialog({
         <div className="flex flex-col items-center gap-3">
           <div className="relative w-full overflow-hidden rounded-md">
             <Image
-              src={displayPath}
+              src={photoSrc(displayPath)}
               alt={`${clientName} 的照片`}
               width={672}
               height={672}

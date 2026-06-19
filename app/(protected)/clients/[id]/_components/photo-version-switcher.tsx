@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PhotoPreviewDialog } from "@/app/_components/photo-preview-dialog";
+import { photoSrc } from "@/app/_lib/utils/photo-url";
 
 interface PhotoVersionSwitcherProps {
   photos: {
@@ -39,7 +40,7 @@ export function PhotoVersionSwitcher({
         aria-label={`檢視 ${clientName} 的照片`}
       >
         <Image
-          src={current.photoPath}
+          src={photoSrc(current.photoPath)}
           alt={`${clientName} 的照片`}
           width={96}
           height={96}

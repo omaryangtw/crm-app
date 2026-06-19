@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/app/_components/confirm-dialog";
 import { ImageCropper } from "@/app/_components/image-cropper";
 import { validatePhotoFile } from "@/app/_lib/utils/photo-validation";
+import { photoSrc } from "@/app/_lib/utils/photo-url";
 import {
   uploadPhoto,
   deletePhoto,
@@ -128,7 +129,7 @@ export function PhotoUploadZone({
         <div className="flex items-center gap-4">
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
             <Image
-              src={activePhoto.photoPath}
+              src={photoSrc(activePhoto.photoPath)}
               alt="族人照片"
               width={96}
               height={96}
