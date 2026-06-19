@@ -14,6 +14,7 @@ export interface BirthdayClientRow {
   addr: string | null;
   canMail: boolean;
   birthMonth: number | null;
+  birthDay: number | null;
 }
 
 export default async function BirthdayPage() {
@@ -52,6 +53,7 @@ export default async function BirthdayPage() {
       addr: c.addr,
       canMail: c.canMail,
       birthMonth: fields.birthMonth,
+      birthDay: fields.birthDay,
     };
   });
 

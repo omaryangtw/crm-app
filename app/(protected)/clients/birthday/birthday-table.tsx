@@ -18,11 +18,12 @@ interface BirthdayTableProps {
 }
 
 export function BirthdayTable({ clients }: BirthdayTableProps) {
-  const [month, setMonth] = useState(0);
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
 
   const filtered = useMemo(() => {
-    if (month === 0) return clients;
-    return clients.filter((c) => c.birthMonth === month);
+    const list = month === 0 ? clients : clients.filter((c) => c.birthMonth === month);
+    // Sort by day of month (1-31)
+    return [...list].sort((a, b) => (a.birthDay ?? 0) - (b.birthDay ?? 0));
   }, [clients, month]);
 
   return (
