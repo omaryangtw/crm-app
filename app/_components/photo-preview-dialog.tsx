@@ -38,6 +38,7 @@ export function PhotoPreviewDialog({
               alt={`${clientName} 的照片`}
               width={672}
               height={672}
+              unoptimized
               className="h-auto w-full object-contain"
               priority
             />

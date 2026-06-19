@@ -93,7 +93,8 @@ export async function uploadPhoto(
 
     await writeFile(path.join(UPLOAD_DIR, thumbnailFilename), thumbBuffer);
     await writeFile(path.join(UPLOAD_DIR, originalFilename), origBuffer);
-  } catch {
+  } catch (err) {
+    console.error("[uploadPhoto] file write failed:", UPLOAD_DIR, err);
     return { success: false, error: "照片儲存失敗，請重試" };
   }
 
@@ -140,7 +141,8 @@ export async function uploadPhoto(
       originalPhotoPath: record.originalPhotoPath,
       version: record.version,
     };
-  } catch {
+  } catch (err) {
+    console.error("[uploadPhoto] db create failed:", err);
     return { success: false, error: "系統錯誤，請稍後再試" };
   }
 }

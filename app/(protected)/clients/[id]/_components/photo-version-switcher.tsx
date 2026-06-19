@@ -43,6 +43,7 @@ export function PhotoVersionSwitcher({
           alt={`${clientName} 的照片`}
           width={96}
           height={96}
+          unoptimized
           className="rounded-full object-cover"
           style={{ width: 96, height: 96 }}
         />

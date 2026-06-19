@@ -132,6 +132,7 @@ export function PhotoUploadZone({
               alt="族人照片"
               width={96}
               height={96}
+              unoptimized
               className="h-full w-full object-cover"
             />
           </div>
