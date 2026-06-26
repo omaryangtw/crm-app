@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   type ColumnDef,
   flexRender,
@@ -43,9 +44,16 @@ export function DataTable<TData>({
   pagination,
 }: DataTableProps<TData>) {
   const rows = table.getRowModel().rows;
+  const searchParams = useSearchParams();
   const totalPages = pagination
     ? Math.max(1, Math.ceil(pagination.total / pagination.pageSize))
     : 1;
+
+  const pageHref = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(page));
+    return `?${params.toString()}`;
+  };
 
   return (
     <div className="space-y-4">
@@ -128,7 +136,7 @@ export function DataTable<TData>({
           </span>
           <div className="flex items-center gap-2">
             {pagination.page > 1 ? (
-              <Link href={`?page=${pagination.page - 1}`}>
+              <Link href={pageHref(pagination.page - 1)}>
                 <Button variant="outline" size="icon-sm">
                   <ChevronLeft className="size-4" />
                 </Button>
@@ -142,7 +150,7 @@ export function DataTable<TData>({
               {pagination.page} / {totalPages}
             </span>
             {pagination.page < totalPages ? (
-              <Link href={`?page=${pagination.page + 1}`}>
+              <Link href={pageHref(pagination.page + 1)}>
                 <Button variant="outline" size="icon-sm">
                   <ChevronRight className="size-4" />
                 </Button>
